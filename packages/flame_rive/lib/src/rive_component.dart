@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flutter/rendering.dart';
-import 'package:rive/math.dart';
+// import 'package:rive/math.dart';
 import 'package:rive/rive.dart';
 
 class RiveComponent extends PositionComponent {
@@ -13,7 +13,7 @@ class RiveComponent extends PositionComponent {
 
   RiveComponent({
     required this.artboard,
-    bool antialiasing = true,
+    // bool antialiasing = true, // RRM:#2
     BoxFit fit = BoxFit.contain,
     Alignment alignment = Alignment.center,
 
@@ -30,7 +30,7 @@ class RiveComponent extends PositionComponent {
     super.priority,
     super.key,
   }) : _renderer = RiveArtboardRenderer(
-         antialiasing: antialiasing,
+         // antialiasing: antialiasing,
          fit: fit,
          alignment: alignment,
          artboard: artboard,
@@ -57,21 +57,22 @@ class RiveComponent extends PositionComponent {
 
 class RiveArtboardRenderer {
   final Artboard artboard;
-  final bool antialiasing;
+  // final bool antialiasing; // RRM:#1
   final BoxFit fit;
   final Alignment alignment;
 
   RiveArtboardRenderer({
-    required this.antialiasing,
+    // required this.antialiasing,
     required this.fit,
     required this.alignment,
     required this.artboard,
   }) {
-    artboard.antialiasing = antialiasing;
+    // artboard.antialiasing = antialiasing;
   }
 
   void advance(double dt) {
-    artboard.advance(dt, nested: true);
+    // artboard.advance(dt, nested: true);
+    artboard.advance(dt);
   }
 
   late final aabb = AABB.fromValues(0, 0, artboard.width, artboard.height);
@@ -84,7 +85,7 @@ class RiveArtboardRenderer {
   final _center = Mat2D();
 
   void _paint(Canvas canvas, AABB bounds, Size size) {
-    const position = Offset.zero;
+    // const position = Offset.zero;
 
     final contentWidth = bounds[2] - bounds[0];
     final contentHeight = bounds[3] - bounds[1];
@@ -106,9 +107,11 @@ class RiveArtboardRenderer {
     var scaleY = 1.0;
 
     canvas.save();
-    if (artboard.clip) {
-      canvas.clipRect(position & size);
-    }
+
+    // RRM:#3
+    // if (artboard.clip) {
+    //   canvas.clipRect(position & size);
+    // }
 
     switch (fit) {
       case BoxFit.fill:
@@ -159,7 +162,7 @@ class RiveArtboardRenderer {
     canvas.scale(scaleX, scaleY);
     canvas.translate(x, y);
 
-    artboard.draw(canvas);
+    artboard.draw(Renderer.make(canvas)); // RRM:#4
     canvas.restore();
   }
 }
@@ -169,15 +172,19 @@ class RiveArtboardRenderer {
 /// When [artboardName] is not null it returns the artboard with the specified
 /// name, an assertion is triggered if no artboard with that name exists in the
 /// file.
+/// RRM:#5
 Future<Artboard> loadArtboard(
-  FutureOr<RiveFile> file, {
+  // FutureOr<RiveFile> file, {
+  FutureOr<File> file, {
   String? artboardName,
 }) async {
   final loaded = await file;
   if (artboardName == null) {
-    return loaded.mainArtboard.instance();
+    // return loaded.mainArtboard.instance();
+    return loaded.defaultArtboard()!;
   } else {
-    final artboard = loaded.artboardByName(artboardName)?.instance();
+    // final artboard = loaded.artboardByName(artboardName)?.instance();
+    final artboard = loaded.artboard(artboardName);
     assert(
       artboard != null,
       'No artboard with the specified name exists in the RiveFile',
