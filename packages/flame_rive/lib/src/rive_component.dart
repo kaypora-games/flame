@@ -1,12 +1,101 @@
+// ignore_for_file: always_put_control_body_on_new_line
+
 import 'dart:async';
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:flame/game.dart';
 import 'package:flutter/rendering.dart';
+import 'package:plato/plato.dart';
 import 'package:rive/math.dart';
 import 'package:rive/rive.dart';
 
-class RiveComponent extends PositionComponent {
+const _logr = Debugr(true, prefix: 'rive-component');
+
+mixin LogicPositionComponent on PositionComponent {
+
+  double get masterScale;
+
+  /// Get logic position (ignoring master scale)
+  NotifyingVector2 get positionLogic => NotifyingVector2.copy(super.position / masterScale);
+
+  NotifyingVector2 get positionSuper => super.position;
+
+  /// Get logic scale (ignoring master scale)
+  NotifyingVector2 get scaleLogic => NotifyingVector2.copy(super.scale / masterScale);
+
+  NotifyingVector2 get scaleSuper => super.scale;
+
+  /// Get x logic (ignoring master scale)
+  double get xLogic => super.x / masterScale;
+
+  /// Get y logic (ignoring master scale)
+  double get yLogic => super.y / masterScale;
+
+  /// Get logic size (ignoring master scale)
+  NotifyingVector2 get sizeLogic => NotifyingVector2.copy(super.size / masterScale);
+
+  NotifyingVector2 get sizeSuper => super.size;
+}
+
+extension PositionComponentExtension on PositionComponent {
+
+  NotifyingVector2 get positionLogic {
+    final t = this;
+    if (t is LogicPositionComponent) {
+      return t.positionLogic;
+    } else {
+      return position;
+    }
+  }
+
+  double get xLogic {
+    final t = this;
+    if (t is LogicPositionComponent) {
+      return t.xLogic;
+    } else {
+      return x;
+    }
+  }
+
+  double get yLogic {
+    final t = this;
+    if (t is LogicPositionComponent) {
+      return t.yLogic;
+    } else {
+      return y;
+    }
+  }
+
+  NotifyingVector2 get sizeLogic {
+    final t = this;
+    if (t is LogicPositionComponent) {
+      return t.sizeLogic;
+    } else {
+      return size;
+    }
+  }
+
+  NotifyingVector2 get sizeSuper {
+    final t = this;
+    if (t is LogicPositionComponent) {
+      return t.sizeSuper;
+    } else {
+      return size;
+    }
+  }
+
+  NotifyingVector2 get scaleLogic {
+    final t = this;
+    if (t is LogicPositionComponent) {
+      return t.scaleLogic;
+    } else {
+      return scale;
+    }
+  }
+}
+
+class RiveComponent extends PositionComponent with LogicPositionComponent {
   final Artboard artboard;
   final RiveArtboardRenderer _renderer;
   late Size _renderSize;
@@ -27,6 +116,7 @@ class RiveComponent extends PositionComponent {
     super.children,
     super.priority,
     super.key,
+    this.debugId,
   }) : _renderer = RiveArtboardRenderer(
     antialiasing: antialiasing,
     fit: fit,
@@ -35,43 +125,98 @@ class RiveComponent extends PositionComponent {
   ),
         super(size: (size ?? Vector2(artboard.width, artboard.height)) * masterScale) {
 
-    this.size.addListener(_updateRenderSize);
+    this.sizeSuper.addListener(_updateRenderSize);
     _updateRenderSize();
   }
 
+  @override
   final double masterScale;
+  final String? debugId;
 
   @override
   set position(Vector2 position) {
     super.position = position * masterScale;
+    if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > POSITION > $position >> ${positionSuper}');
+  }
+
+  @override
+  NotifyingVector2 get position {
+    if (StackTrace.current.toString().contains(runtimeType.toString())) _logr.log(() => 'REVIEW $runtimeType call to position > ${StackTrace.current}');
+    return super.position;
   }
 
   @override
   set scale(Vector2 scale) {
     super.scale = scale * masterScale;
+    if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > SCALE > $scale >> ${scaleSuper}');
+  }
+
+  @override
+  NotifyingVector2 get scale {
+    if (StackTrace.current.toString().contains(runtimeType.toString())) _logr.log(() => 'REVIEW $runtimeType call to scale');
+    return super.scale;
   }
 
   @override
   set x(double x) {
     super.x = x * masterScale;
+    if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > X > $x >> ${this.x}');
+  }
+
+  @override
+  double get x {
+    if (StackTrace.current.toString().contains(runtimeType.toString())) _logr.log(() => 'REVIEW $runtimeType call to x');
+    return super.x;
   }
 
   @override
   set y(double y) {
     super.y = y * masterScale;
+    if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > Y > $y >> ${this.y}');
+  }
+
+  @override
+  double get y {
+    if (StackTrace.current.toString().contains(runtimeType.toString())) _logr.log(() => 'REVIEW $runtimeType call to y');
+    return super.y;
   }
 
   @override
   set size(Vector2 size) {
     super.size = size * masterScale;
+    if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > SIZE > $size >> ${this.size}');
+  }
+
+  @override
+  NotifyingVector2 get size {
+    if (StackTrace.current.toString().contains(runtimeType.toString())) _logr.log(() => 'REVIEW $runtimeType call to size > ${StackTrace.current}');
+    return super.size;
   }
 
   @override
   set center(Vector2 point) {
-    super.center = point * masterScale;
+
+    final p = positionLogic; // retrieve position neutralizing master scale
+    final c = center;
+    position = p + point - c; // set position to new center
+
+    if (debugId?.contains('fan_crowd_line')??false) {
+      _logr.log(() => 'RIVE-COMPONENT > CENTER > $p $point $c >> $positionLogic >> $positionSuper');
+    }
   }
 
-  void _updateRenderSize() => _renderSize = size.toSize();
+  /// Similar to [positionOf()], but applies to any anchor point within
+  /// the component
+  @override
+  Vector2 positionOfAnchor(Anchor anchor) {
+    if (anchor == super.anchor) {
+      return positionLogic;
+    }
+    final size = sizeLogic;
+    return positionOf(Vector2(anchor.x * size.x, anchor.y * size.y));
+  }
+
+  void _updateRenderSize() => _renderSize = sizeSuper.toSize();
 
   @override
   void render(Canvas canvas) =>
