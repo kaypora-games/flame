@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flame/game.dart';
 import 'package:vector_math/vector_math.dart';
 
 export 'package:vector_math/vector_math.dart' hide Colors;
@@ -212,3 +213,109 @@ extension Vector2Extension on Vector2 {
   /// Creates a new identity [Vector2] (1.0, 1.0).
   static Vector2 identity() => Vector2.all(1.0);
 }
+
+class ImmutableVector2 extends NotifyingVector2 {
+
+  static final ImmutableVector2 zero = ImmutableVector2._zero();
+  static final ImmutableVector2 one = ImmutableVector2(1.0, 1.0);
+
+  factory ImmutableVector2(double x, double y) =>
+      ImmutableVector2._zero().._setValues(x, y);
+
+  factory ImmutableVector2.divide(Vector2 vector, double divider) =>
+      ImmutableVector2(vector.x / divider, vector.y / divider);
+
+  factory ImmutableVector2.copy(Vector2 vector) =>
+      ImmutableVector2(vector.x, vector.y);
+
+  ImmutableVector2._zero() : super.zero();
+
+  void _setValues(double x_, double y_) =>
+      super.setValues(x_, y_);
+
+  NotifyingVector2 get mutable => NotifyingVector2(x, y);
+
+  @override
+  void addListener(VoidCallback listener) => throw _error;
+
+  @override
+  void removeListener(VoidCallback listener) => throw _error;
+
+  StateError get _error => StateError('ImmutableVector2 is immutable');
+
+  @override
+  void setValues(double x_, double y_) => throw _error;
+  @override
+  void setZero() => throw _error;
+  @override
+  void setFrom(Vector2 other) => throw _error;
+  @override
+  void splat(double arg) => throw _error;
+  @override
+  void operator []=(int i, double v) => throw _error;
+  @override
+  set length(double value) => throw _error;
+  @override
+  double normalize() => throw _error;
+  @override
+  double normalizeLength() => throw _error;
+  @override
+  void postmultiply(Matrix2 arg) => throw _error;
+  @override
+  void reflect(Vector2 normal) => throw _error;
+  @override
+  void add(Vector2 arg) => throw _error;
+  @override
+  void addScaled(Vector2 arg, double factor) => throw _error;
+  @override
+  void sub(Vector2 arg) => throw _error;
+  @override
+  void multiply(Vector2 arg) => throw _error;
+  @override
+  void divide(Vector2 arg) => throw _error;
+  @override
+  void scale(double arg) => throw _error;
+  @override
+  void negate() => throw _error;
+  @override
+  void absolute() => throw _error;
+  @override
+  void clamp(Vector2 min, Vector2 max) => throw _error;
+  @override
+  void clampScalar(double min, double max) => throw _error;
+  @override
+  void floor() => throw _error;
+  @override
+  void ceil() => throw _error;
+  @override
+  void round() => throw _error;
+  @override
+  void roundToZero() => throw _error;
+  @override
+  void copyFromArray(List<double> array, [int offset = 0]) => throw _error;
+  @override
+  set xy(Vector2 arg) => throw _error;
+  @override
+  set yx(Vector2 arg) => throw _error;
+  @override
+  set r(double arg) => throw _error;
+  @override
+  set g(double arg) => throw _error;
+  @override
+  set s(double arg) => throw _error;
+  @override
+  set t(double arg) => throw _error;
+  @override
+  set x(double arg) => throw _error;
+  @override
+  set y(double arg) => throw _error;
+  @override
+  set rg(Vector2 arg) => throw _error;
+  @override
+  set gr(Vector2 arg) => throw _error;
+  @override
+  set st(Vector2 arg) => throw _error;
+  @override
+  set ts(Vector2 arg) => throw _error;
+}
+

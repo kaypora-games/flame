@@ -17,12 +17,12 @@ mixin LogicPositionComponent on PositionComponent {
   double get masterScale;
 
   /// Get logic position (ignoring master scale)
-  NotifyingVector2 get positionLogic => NotifyingVector2.copy(super.position / masterScale);
+  ImmutableVector2 get positionLogic => ImmutableVector2.divide(super.position, masterScale);
 
   NotifyingVector2 get positionSuper => super.position;
 
   /// Get logic scale (ignoring master scale)
-  NotifyingVector2 get scaleLogic => NotifyingVector2.copy(super.scale / masterScale);
+  ImmutableVector2 get scaleLogic => ImmutableVector2.divide(super.scale, masterScale);
 
   NotifyingVector2 get scaleSuper => super.scale;
 
@@ -33,14 +33,14 @@ mixin LogicPositionComponent on PositionComponent {
   double get yLogic => super.y / masterScale;
 
   /// Get logic size (ignoring master scale)
-  NotifyingVector2 get sizeLogic => NotifyingVector2.copy(super.size / masterScale);
+  ImmutableVector2 get sizeLogic => ImmutableVector2.divide(super.size, masterScale);
 
   NotifyingVector2 get sizeSuper => super.size;
 }
 
 extension PositionComponentExtension on PositionComponent {
 
-  NotifyingVector2 get positionLogic {
+  Vector2 get positionLogic {
     final t = this;
     if (t is LogicPositionComponent) {
       return t.positionLogic;
@@ -67,7 +67,7 @@ extension PositionComponentExtension on PositionComponent {
     }
   }
 
-  NotifyingVector2 get sizeLogic {
+  Vector2 get sizeLogic {
     final t = this;
     if (t is LogicPositionComponent) {
       return t.sizeLogic;
@@ -85,7 +85,7 @@ extension PositionComponentExtension on PositionComponent {
     }
   }
 
-  NotifyingVector2 get scaleLogic {
+  Vector2 get scaleLogic {
     final t = this;
     if (t is LogicPositionComponent) {
       return t.scaleLogic;
@@ -210,9 +210,9 @@ class RiveComponent extends PositionComponent with LogicPositionComponent {
   @override
   Vector2 positionOfAnchor(Anchor anchor) {
     if (anchor == super.anchor) {
-      return positionLogic;
+      return positionSuper;
     }
-    final size = sizeLogic;
+    final size = sizeSuper;
     return positionOf(Vector2(anchor.x * size.x, anchor.y * size.y));
   }
 
