@@ -2,9 +2,14 @@ import 'dart:async';
 import 'dart:convert' show base64;
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:flame/src/flame.dart';
+import 'package:flutter/cupertino.dart' show debugPrintStack;
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:plato/plato.dart';
+
+const _logr = Debugr(true, prefix: 'flame.images');
 
 class Images {
   Images({
@@ -13,7 +18,17 @@ class Images {
   }) : _prefix = prefix,
        bundle = bundle ?? Flame.bundle;
 
-  final Map<String, _ImageAsset> _assets = {};
+  /// The the byte length of cached items
+  int get length => _assets.values.map((a) => a.length).sum;
+
+  @override
+  String toString() => Printr.print(this,
+    'items=${_assets.length}',
+    _assets.values.map((a) => a.name).join(', '),
+    'length=$length',
+  );
+
+  final _assets = LruCache<String, _ImageAsset>();
 
   /// The [AssetBundle] from which images are loaded.
   /// defaults to [Flame.bundle].
@@ -45,16 +60,16 @@ class Images {
   /// The cache will assume the ownership of the [image], and will properly
   /// dispose of it at the end.
   void add(String name, Image image) {
-    _assets[name]?.dispose();
-    _assets[name] = _ImageAsset.fromImage(image);
+    _assets.get(name)?.dispose();
+    _assets.put(name, _ImageAsset.fromImage(name, image));
   }
 
   /// Transform the base64 encoded image into an [Image] and adds it into the
   /// cache.
   Future<void> addFromBase64Data(String name, String base64Data) async {
-    _assets[name]?.dispose();
+    _assets.get(name)?.dispose();
     final image = await _fetchFromBase64(base64Data);
-    _assets[name] = _ImageAsset.fromImage(image);
+    _assets.put(name, _ImageAsset.fromImage(name, image));
   }
 
   /// If the image with [name] exists in the cache that is returned, otherwise
@@ -65,11 +80,10 @@ class Images {
   Future<Image> fetchOrGenerate(
     String name,
     Future<Image> Function() imageGenerator,
-  ) {
-    return (_assets[name] ??= _ImageAsset.future(
+  ) => _assets.putIfAbsent(name, (_) => _ImageAsset.future(
+      name,
       imageGenerator(),
     )).retrieveAsync();
-  }
 
   /// Removes the image [name] from the cache.
   ///
@@ -88,7 +102,7 @@ class Images {
   /// you don't use any of the previously cached images once [clearCache] has
   /// been called.
   void clearCache() {
-    _assets.forEach((_, asset) => asset.dispose());
+    _assets.values.forEach((a) => a.dispose());
     _assets.clear();
   }
 
@@ -100,7 +114,7 @@ class Images {
   /// If you want to retain the image even after you remove it from the cache,
   /// then you can call `Image.clone()` on it.
   Image fromCache(String name) {
-    final asset = _assets[name];
+    final asset = _assets.get(name);
     assert(
       asset != null,
       'Tried to access an image "$name" that does not exist in the cache. Make '
@@ -117,11 +131,11 @@ class Images {
   /// Loads the specified image with [fileName] into the cache.
   /// By default the key in the cache is the [fileName], if another key is
   /// desired, specify the optional [key] argument.
-  Future<Image> load(String fileName, {String? key}) {
-    return (_assets[key ?? fileName] ??= _ImageAsset.future(
+  Future<Image> load(String fileName, {String? key}) =>
+    _assets.putIfAbsent(key ?? fileName, (_) => _ImageAsset.future(
+      fileName,
       _fetchToMemory(fileName),
     )).retrieveAsync();
-  }
 
   /// Loads all images with the specified [fileNames] into the cache.
   Future<List<Image>> loadAll(List<String> fileNames) {
@@ -130,26 +144,28 @@ class Images {
 
   /// Loads all images from the specified (or default) [prefix] into the cache.
   Future<List<Image>> loadAllImages() {
-    return loadAllFromPattern(
-      RegExp(
-        r'\.(png|jpg|jpeg|svg|gif|webp|bmp|wbmp)$',
-        caseSensitive: false,
-      ),
-    );
+    throw StateError('do not call loadAllImages()');
+    // return loadAllFromPattern(
+    //   RegExp(
+    //     r'\.(png|jpg|jpeg|svg|gif|webp|bmp|wbmp)$',
+    //     caseSensitive: false,
+    //   ),
+    // );
   }
 
   /// Loads all images in the [prefix]ed path that are matching the specified
   /// pattern.
   Future<List<Image>> loadAllFromPattern(Pattern pattern) async {
-    final manifest = await AssetManifest.loadFromAssetBundle(bundle);
-    final imagePaths = manifest
-        .listAssets()
-        .where((path) {
-          return path.startsWith(_prefix) &&
-              path.toLowerCase().contains(pattern);
-        })
-        .map((path) => path.replaceFirst(_prefix, ''));
-    return loadAll(imagePaths.toList());
+    throw StateError('do not call loadAllFromPattern()');
+    // final manifest = await AssetManifest.loadFromAssetBundle(bundle);
+    // final imagePaths = manifest
+    //     .listAssets()
+    //     .where((path) {
+    //       return path.startsWith(_prefix) &&
+    //           path.toLowerCase().contains(pattern);
+    //     })
+    //     .map((path) => path.replaceFirst(_prefix, ''));
+    // return loadAll(imagePaths.toList());
   }
 
   /// Whether the cache contains the specified [key] or not.
@@ -158,32 +174,41 @@ class Images {
   /// Returns the list of keys in the cache.
   List<String> get keys => _assets.keys.toList();
 
-  String? findKeyForImage(Image image) {
-    return _assets.keys.firstWhere(
-      (k) => _assets[k]?.image?.isCloneOf(image) ?? false,
+  String? findKeyForImage(Image image) =>
+    _assets.keys.firstWhere(
+      (k) => _assets.get(k)?.image?.isCloneOf(image) ?? false,
     );
-  }
 
   /// Waits until all currently pending image loading operations complete.
   Future<void> ready() {
     return Future.wait(_assets.values.map((asset) => asset.retrieveAsync()));
   }
 
-  Future<Image> fromBase64(String key, String base64) {
-    return (_assets[key] ??= _ImageAsset.future(
+  Future<Image> fromBase64(String key, String base64) =>
+    _assets.putIfAbsent(key, (_) => _ImageAsset.future(
+      key,
       _fetchFromBase64(base64),
     )).retrieveAsync();
-  }
 
   Future<Image> _fetchFromBase64(String base64Data) {
     final data = base64Data.substring(base64Data.indexOf(',') + 1);
     final bytes = base64.decode(data);
+    _logr.log(() => '_fetchFromBase64 > ${base64Data.length}');
     return decodeImageFromList(bytes);
   }
 
   Future<Image> _fetchToMemory(String name) async {
-    final data = await bundle.load('$_prefix$name');
-    final bytes = Uint8List.view(data.buffer);
+    final bytes = await Plato().provider.assetLoader.loadBytes('$_prefix$name');
+    // final watch = Stopwatch()..start();
+    // final data = await bundle.load('$_prefix$name');
+    // _logr.log(() => '_fetchToMemory LOAD > $name > ${watch.elapsedMilliseconds}');
+    // watch.reset();
+    // final bytes = Uint8List.view(data.buffer);
+    // _logr.log(() => '_fetchToMemory BYTES > $name > ${watch.elapsedMilliseconds}');
+    _logr.log(() => '_fetchToMemory > $name ${bytes.length}');
+    // if (name.contains('stadium')) {
+    //   debugPrintStack(maxFrames: 20);
+    // }
     return decodeImageFromList(bytes);
   }
 }
@@ -193,14 +218,26 @@ class Images {
 /// This class owns the [Image] object, which can be disposed of using the
 /// [dispose] method.
 class _ImageAsset {
-  _ImageAsset.future(Future<Image> future) : _future = future {
+
+  final String name;
+
+  _ImageAsset.future(this.name, Future<Image> future) : _future = future {
     _future!.then((image) {
       _image = image;
       _future = null;
     });
   }
 
-  _ImageAsset.fromImage(Image image) : _image = image;
+  int get length {
+    final i = _image;
+    if (i == null) {
+      return 0;
+    } else {
+      return i.width * i.height * 4;
+    }
+  }
+
+  _ImageAsset.fromImage(this.name, Image image) : _image = image;
 
   Image? get image => _image;
   Image? _image;

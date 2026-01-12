@@ -1,8 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:flame/flame.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show AssetBundle;
+import 'package:plato/plato.dart';
+
+const _logr = Debugr(true, prefix: 'flame.assets_cache');
 
 /// A class that loads, and caches files.
 ///
@@ -16,6 +21,15 @@ class AssetsCache {
   /// The [AssetBundle] from which assets are loaded.
   /// defaults to [Flame.bundle].
   AssetBundle bundle;
+
+  /// The the byte length of cached items
+  int get length => _files.values.map((a) => a.length).sum;
+
+  @override
+  String toString() => Printr.print(this,
+    'items=$cacheCount',
+    'length=$length'
+  );
 
   String prefix;
   final Map<String, _Asset<dynamic>> _files = {};
@@ -35,55 +49,48 @@ class AssetsCache {
 
   /// Reads a file from assets folder.
   Future<String> readFile(String fileName) async {
-    if (!_files.containsKey(fileName)) {
-      _files[fileName] = await _readFile(fileName);
-    }
-    assert(
-      _files[fileName] is _StringAsset,
-      '"$fileName" was previously loaded as a binary file',
-    );
-    return (_files[fileName]! as _StringAsset).value;
+    var asset = _files[fileName];
+    asset ??= _files[fileName] = await _readFile(fileName);
+    return (asset as _StringAsset).value;
   }
 
   /// Reads a binary file from assets folder.
   Future<Uint8List> readBinaryFile(String fileName) async {
-    if (!_files.containsKey(fileName)) {
-      _files[fileName] = await _readBinary(fileName);
-    }
-    assert(
-      _files[fileName] is _BinaryAsset,
-      '"$fileName" was previously loaded as a text file',
-    );
-    return (_files[fileName]! as _BinaryAsset).value;
+    var asset = _files[fileName];
+    asset ??= _files[fileName] = await _readBinary(fileName);
+    return (asset as _BinaryAsset).value;
   }
 
   /// Reads a json file from the assets folder.
   Future<Map<String, dynamic>> readJson(String fileName) async {
-    if (!_files.containsKey(fileName)) {
-      _files[fileName] = await _readJson(fileName);
-    }
-    assert(
-      _files[fileName] is _JsonAsset,
-      '"$fileName" was previously loaded as a different type',
-    );
-    return (_files[fileName]! as _JsonAsset).value;
+    var asset = _files[fileName];
+    asset ??= _files[fileName] = await _readJson(fileName);
+    return (asset as _JsonAsset).value;
   }
 
   Future<_StringAsset> _readFile(String fileName) async {
-    final string = await bundle.loadString('$prefix$fileName');
-    return _StringAsset(string);
+    final asset = _StringAsset(await bundle.loadString('$prefix$fileName'));
+    _logr.log(() => 'READ-FILE > $asset');
+    return asset;
   }
 
   Future<_BinaryAsset> _readBinary(String fileName) async {
-    final data = await bundle.load('$prefix$fileName');
-    final bytes = Uint8List.view(data.buffer);
-    return _BinaryAsset(bytes);
+    // final data = await bundle.load('$prefix$fileName');
+    // final bytes = Uint8List.view(data.buffer);
+    // return _BinaryAsset(bytes);
+    final asset = _BinaryAsset(Uint8List.view((await bundle.load('$prefix$fileName')).buffer));
+    _logr.log(() => 'READ-BINARY > $asset');
+    return asset;
   }
 
   Future<_JsonAsset> _readJson(String fileName) async {
-    final string = await bundle.loadString('$prefix$fileName');
-    final json = jsonDecode(string) as Map<String, dynamic>;
-    return _JsonAsset(json);
+    // final string = await bundle.loadString('$prefix$fileName');
+    // final json = jsonDecode(string) as Map<String, dynamic>;
+    // return _JsonAsset(json);
+
+    final asset = _JsonAsset(jsonDecode(await bundle.loadString('$prefix$fileName')) as Map<String, dynamic>);
+    _logr.log(() => 'READ-JSON > $asset');
+    return asset;
   }
 
   /// This method provides synchronous access to cached assets, similar to
@@ -108,18 +115,24 @@ class AssetsCache {
 }
 
 sealed class _Asset<T> {
+  int length;
   T value;
-  _Asset(this.value);
+  _Asset(this.length, this.value);
+
+  @override
+  String toString() => Printr.print(this,
+    '$length'
+  );
 }
 
 class _StringAsset extends _Asset<String> {
-  _StringAsset(super.value);
+  _StringAsset(String value): super(value.length, value);
 }
 
 class _BinaryAsset extends _Asset<Uint8List> {
-  _BinaryAsset(super.value);
+  _BinaryAsset(Uint8List bytes): super(bytes.length, bytes);
 }
 
 class _JsonAsset extends _Asset<Map<String, dynamic>> {
-  _JsonAsset(super.value);
+  _JsonAsset(Map<String, dynamic> map): super(map.length, map);
 }

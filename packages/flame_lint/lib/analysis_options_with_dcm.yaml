@@ -18,3 +18,7 @@ dart_code_metrics:
     - double-literal-format
   # flutter rules
     - prefer-define-hero-tag
+
+linter:
+  rules:
+    lines_longer_than_80_chars: false

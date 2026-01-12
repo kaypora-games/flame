@@ -71,6 +71,11 @@ workspace:
 environment:
   sdk: ">=3.8.0 <4.0.0"
 
+dependency_overrides:
+
+  plato:
+    path: ../plato/
+
 dev_dependencies:
   melos: ^7.0.0-dev.10
 
