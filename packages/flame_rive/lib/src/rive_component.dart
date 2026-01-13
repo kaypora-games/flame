@@ -3,8 +3,10 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:plato/plato.dart';
 import 'package:rive/math.dart';
@@ -29,13 +31,49 @@ mixin LogicPositionComponent on PositionComponent {
   /// Get x logic (ignoring master scale)
   double get xLogic => super.x / masterScale;
 
+  double get xSuper => super.x;
+
   /// Get y logic (ignoring master scale)
   double get yLogic => super.y / masterScale;
+
+  double get ySuper => super.y;
 
   /// Get logic size (ignoring master scale)
   ImmutableVector2 get sizeLogic => ImmutableVector2.divide(super.size, masterScale);
 
   NotifyingVector2 get sizeSuper => super.size;
+
+  /// Activate this on debug to validate access to position properties size, scale, x, y and position.
+  /// This is very CPU intensive, so never push to production
+  static const testingAccess = kDebugMode && true;
+
+  static final _testedAccesses = <String>{};
+
+  /// Test if the stack trace involves a child project or Rive Component, for debug reasons only
+  bool get testAccess {
+    final s = StackTrace.current.toString();
+
+    if (s.split('#') // split by lines
+      .whereNot((t) => t.contains('FieldChildComponent') || t.contains('MatchGame.update')) // ignore FieldChildComponent
+      .where((t) => t.contains(runtimeType.toString()) || t.contains('bfut_2')  || t.contains('RiveComponent'))
+      .isNotEmpty) {
+      if (_testedAccesses.add(s)) {
+
+        s.split('#') // split by lines
+            .where((t) => t.contains('FieldChildComponent') || t.contains('MatchGame.update')) // ignore FieldChildComponent
+            .forEach((t) => _logr.log(() => t));
+
+        s.split('#') // split by lines
+            .where((t) => !t.contains('FieldChildComponent')) // ignore FieldChildComponent
+            .where((t) => t.contains(runtimeType.toString()) || t.contains('bfut_2')  || t.contains('RiveComponent'))
+            .forEach((t) => _logr.log(() => t));
+
+        _logr.warn(() => 'TEST-ACCESS > ${_testedAccesses.length}');
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 extension PositionComponentExtension on PositionComponent {
@@ -125,7 +163,7 @@ class RiveComponent extends PositionComponent with LogicPositionComponent {
   ),
         super(size: (size ?? Vector2(artboard.width, artboard.height)) * masterScale) {
 
-    this.sizeSuper.addListener(_updateRenderSize);
+    super.size.addListener(_updateRenderSize);
     _updateRenderSize();
   }
 
@@ -136,60 +174,60 @@ class RiveComponent extends PositionComponent with LogicPositionComponent {
   @override
   set position(Vector2 position) {
     super.position = position * masterScale;
-    if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > POSITION > $position >> ${positionSuper}');
+    // if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > POSITION > $position >> ${positionSuper}');
   }
 
   @override
   NotifyingVector2 get position {
-    if (StackTrace.current.toString().contains(runtimeType.toString())) _logr.log(() => 'REVIEW $runtimeType call to position > ${StackTrace.current}');
+    if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to position > ${StackTrace.current}');
     return super.position;
   }
 
   @override
   set scale(Vector2 scale) {
     super.scale = scale * masterScale;
-    if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > SCALE > $scale >> ${scaleSuper}');
+    // if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > SCALE > $scale >> ${scaleSuper}');
   }
 
   @override
   NotifyingVector2 get scale {
-    if (StackTrace.current.toString().contains(runtimeType.toString())) _logr.log(() => 'REVIEW $runtimeType call to scale');
+    if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to scale > ${StackTrace.current}');
     return super.scale;
   }
 
   @override
   set x(double x) {
     super.x = x * masterScale;
-    if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > X > $x >> ${this.x}');
+    // if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > X > $x >> ${this.x}');
   }
 
   @override
   double get x {
-    if (StackTrace.current.toString().contains(runtimeType.toString())) _logr.log(() => 'REVIEW $runtimeType call to x');
+    if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to x > ${StackTrace.current}');
     return super.x;
   }
 
   @override
   set y(double y) {
     super.y = y * masterScale;
-    if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > Y > $y >> ${this.y}');
+    // if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > Y > $y >> ${this.y}');
   }
 
   @override
   double get y {
-    if (StackTrace.current.toString().contains(runtimeType.toString())) _logr.log(() => 'REVIEW $runtimeType call to y');
+    if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to y > ${StackTrace.current}');
     return super.y;
   }
 
   @override
   set size(Vector2 size) {
     super.size = size * masterScale;
-    if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > SIZE > $size >> ${this.size}');
+    // if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > SIZE > $size >> ${this.size}');
   }
 
   @override
   NotifyingVector2 get size {
-    if (StackTrace.current.toString().contains(runtimeType.toString())) _logr.log(() => 'REVIEW $runtimeType call to size > ${StackTrace.current}');
+    if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to size > ${StackTrace.current}');
     return super.size;
   }
 
@@ -200,9 +238,7 @@ class RiveComponent extends PositionComponent with LogicPositionComponent {
     final c = center;
     position = p + point - c; // set position to new center
 
-    if (debugId?.contains('fan_crowd_line')??false) {
-      _logr.log(() => 'RIVE-COMPONENT > CENTER > $p $point $c >> $positionLogic >> $positionSuper');
-    }
+    // if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > CENTER > $p $point $c >> $positionLogic >> $positionSuper');
   }
 
   /// Similar to [positionOf()], but applies to any anchor point within
