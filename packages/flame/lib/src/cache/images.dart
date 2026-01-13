@@ -4,7 +4,6 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flame/src/flame.dart';
-import 'package:flutter/cupertino.dart' show debugPrintStack;
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:plato/plato.dart';
@@ -29,6 +28,8 @@ class Images {
   );
 
   final _assets = LruCache<String, _ImageAsset>();
+
+  bool get isNotEmpty => _assets.isNotEmpty;
 
   /// The [AssetBundle] from which images are loaded.
   /// defaults to [Flame.bundle].
@@ -171,8 +172,11 @@ class Images {
   /// Whether the cache contains the specified [key] or not.
   bool containsKey(String key) => _assets.containsKey(key);
 
-  /// Returns the list of keys in the cache.
-  List<String> get keys => _assets.keys.toList();
+  // /// Returns the list of keys in the cache.
+  // Iterable<String> get keys => _assets.keys;
+
+  String? removeEldest() =>
+      _assets.removeEldest()?.key;
 
   String? findKeyForImage(Image image) =>
     _assets.keys.firstWhere(

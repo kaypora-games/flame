@@ -31,6 +31,9 @@ class AssetsCache {
     'length=$length'
   );
 
+  // String? removeEldest() =>
+  //     _files.removeEldest()?.key;
+
   String prefix;
   final Map<String, _Asset<dynamic>> _files = {};
 

@@ -45,7 +45,7 @@ mixin LogicPositionComponent on PositionComponent {
 
   /// Activate this on debug to validate access to position properties size, scale, x, y and position.
   /// This is very CPU intensive, so never push to production
-  static const testingAccess = kDebugMode && true;
+  static const testingAccess = kDebugMode && false;
 
   static final _testedAccesses = <String>{};
 
