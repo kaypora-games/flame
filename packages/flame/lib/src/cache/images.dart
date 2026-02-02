@@ -8,7 +8,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:plato/plato.dart';
 
-const _logr = Debugr(true, prefix: 'flame.images');
+const _logr = Debugr(false, prefix: 'flame.images');
 
 class Images {
   Images({
