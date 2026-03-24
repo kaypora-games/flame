@@ -26,11 +26,6 @@ dependencies:
   plato:
   vector_math: ^2.1.4
 
-#dependency_overrides:
-#
-#  plato:
-#    path: ../../../plato/
-
 dev_dependencies:
   benchmark_harness: ^2.3.1
   canvas_test: ^0.2.0
