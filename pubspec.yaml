@@ -2,6 +2,7 @@
 
 
 
+
 name: _
 repository: https://github.com/flame-engine/flame
 workspace:
@@ -78,10 +79,10 @@ environment:
 dependency_overrides:
 
   plato: # swappable
-    path: ../plato/
-    # git:
-      # url: git@github.com:kaypora-games/plato.git
-      # ref: develop-2
+    # path: ../plato/
+    git:
+      url: git@github.com:kaypora-games/plato.git
+      ref: develop-2
 
 dev_dependencies:
   melos: ^7.0.0-dev.10
