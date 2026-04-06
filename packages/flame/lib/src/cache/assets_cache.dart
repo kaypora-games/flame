@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show AssetBundle;
 import 'package:plato/plato.dart';
 
-const _logr = Debugr(true, prefix: 'flame.assets_cache');
+const _logr = Logr(true, prefix: 'flame.assets_cache');
 
 /// A class that loads, and caches files.
 ///
