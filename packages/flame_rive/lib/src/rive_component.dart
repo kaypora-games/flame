@@ -78,12 +78,12 @@ mixin LogicPositionComponent on PositionComponent {
 
 extension PositionComponentExtension on PositionComponent {
 
-  Vector2 get positionLogic {
+  ImmutableVector2 get positionLogic {
     final t = this;
     if (t is LogicPositionComponent) {
       return t.positionLogic;
     } else {
-      return position;
+      return position.toImmutable();
     }
   }
 
@@ -105,12 +105,12 @@ extension PositionComponentExtension on PositionComponent {
     }
   }
 
-  Vector2 get sizeLogic {
+  ImmutableVector2 get sizeLogic {
     final t = this;
     if (t is LogicPositionComponent) {
       return t.sizeLogic;
     } else {
-      return size;
+      return size.toImmutable();
     }
   }
 
@@ -123,12 +123,12 @@ extension PositionComponentExtension on PositionComponent {
     }
   }
 
-  Vector2 get scaleLogic {
+  ImmutableVector2 get scaleLogic {
     final t = this;
     if (t is LogicPositionComponent) {
       return t.scaleLogic;
     } else {
-      return scale;
+      return scale.toImmutable();
     }
   }
 }

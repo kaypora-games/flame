@@ -23,6 +23,9 @@ extension Vector2Extension on Vector2 {
   /// Creates a [Point] from the [Vector2]
   Point toPoint() => Point(x, y);
 
+  /// Create an immutable vector
+  ImmutableVector2 toImmutable() => ImmutableVector2.copy(this);
+
   /// A rectangle constructor operator.
   ///
   /// Combines two [Vector2]s to form a Rect whose top-left coordinate is the
