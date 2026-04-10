@@ -236,7 +236,7 @@ class ImmutableVector2 extends NotifyingVector2 {
   void _setValues(double x_, double y_) =>
       super.setValues(x_, y_);
 
-  NotifyingVector2 get mutable => NotifyingVector2(x, y);
+  NotifyingVector2 toMutable() => NotifyingVector2(x, y);
 
   @override
   void addListener(VoidCallback listener) => throw _error;
