@@ -12,7 +12,7 @@ import 'package:plato/plato.dart';
 import 'package:rive/math.dart';
 import 'package:rive/rive.dart';
 
-const _logr = Debugr(true, prefix: 'rive-component');
+const _logr = Logr(true, prefix: 'rive-component');
 
 mixin LogicPositionComponent on PositionComponent {
 
