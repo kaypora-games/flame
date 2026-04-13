@@ -38,6 +38,7 @@ class Transform2D extends ChangeNotifier {
   final Matrix4 _transformMatrix;
   bool _recalculate;
   double _angle;
+
   final NotifyingVector2 _position;
   final NotifyingVector2 _scale;
   final NotifyingVector2 _offset;
@@ -46,9 +47,13 @@ class Transform2D extends ChangeNotifier {
     : _transformMatrix = Matrix4.identity(),
       _recalculate = true,
       _angle = 0,
-      _position = NotifyingVector2.zero(),
-      _scale = NotifyingVector2.all(1),
-      _offset = NotifyingVector2.zero() {
+      // _position = NotifyingVector2.zero(),
+      // _scale = NotifyingVector2.all(1),
+      // _offset = NotifyingVector2.zero()
+      _position = SingleListenerNotifyingVector2(0,0),
+      _scale = SingleListenerNotifyingVector2(1,1),
+      _offset = SingleListenerNotifyingVector2(0,0)
+  {
     _position.addListener(_markAsModified);
     _scale.addListener(_markAsModified);
     _offset.addListener(_markAsModified);
@@ -252,6 +257,7 @@ class Transform2D extends ChangeNotifier {
   bool get hasReflection => _scale.x.sign * _scale.y.sign == -1;
 
   void _markAsModified() {
+    if (_recalculate) return; // already flagged
     _recalculate = true;
     notifyListeners();
   }

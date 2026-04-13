@@ -3,10 +3,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:flame/components.dart';
-import 'package:flame/game.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:plato/plato.dart';
 import 'package:rive/math.dart';
@@ -14,126 +11,80 @@ import 'package:rive/rive.dart';
 
 const _logr = Logr(true, prefix: 'rive-component');
 
-mixin LogicPositionComponent on PositionComponent {
+// mixin LogicPositionComponent on PositionComponent {
+//
+//   ImmutableVector2 get positionLogic => position.toImmutable();
+//
+//   double get xLogic => x;
+//   double get yLogic => y;
+//
+//   ImmutableVector2 get sizeLogic => size.toImmutable();
+//
+//   NotifyingVector2 get sizeSuper => size;
+//
+//   ImmutableVector2 get scaleLogic => scale.toImmutable();
+// }
 
-  double get masterScale;
+// extension PositionComponentExtension on PositionComponent {
 
-  /// Get logic position (ignoring master scale)
-  ImmutableVector2 get positionLogic => ImmutableVector2.divide(super.position, masterScale);
+  // ImmutableVector2 get positionLogic {
+  //   final t = this;
+  //   if (t is RiveComponent) {
+  //     return t.positionLogic;
+  //   } else {
+  //     return position.toImmutable();
+  //   }
+  // }
+  //
+  // double get xLogic {
+  //   final t = this;
+  //   if (t is RiveComponent) {
+  //     return t.xLogic;
+  //   } else {
+  //     return x;
+  //   }
+  // }
+  //
+  // double get yLogic {
+  //   final t = this;
+  //   if (t is RiveComponent) {
+  //     return t.yLogic;
+  //   } else {
+  //     return y;
+  //   }
+  // }
+  //
+  // ImmutableVector2 get sizeLogic {
+  //   final t = this;
+  //   if (t is RiveComponent) {
+  //     return t.sizeLogic;
+  //   } else {
+  //     return size.toImmutable();
+  //   }
+  // }
+  //
+  // NotifyingVector2 get sizeSuper {
+  //   final t = this;
+  //   if (t is RiveComponent) {
+  //     return t.sizeSuper;
+  //   } else {
+  //     return size;
+  //   }
+  // }
+  //
+  // ImmutableVector2 get scaleLogic {
+  //   final t = this;
+  //   if (t is RiveComponent) {
+  //     return t.scaleLogic;
+  //   } else {
+  //     return scale.toImmutable();
+  //   }
+  // }
+// }
 
-  NotifyingVector2 get positionSuper => super.position;
+class RiveComponent
+    extends PositionComponent {
 
-  /// Get logic scale (ignoring master scale)
-  ImmutableVector2 get scaleLogic => ImmutableVector2.divide(super.scale, masterScale);
-
-  NotifyingVector2 get scaleSuper => super.scale;
-
-  /// Get x logic (ignoring master scale)
-  double get xLogic => super.x / masterScale;
-
-  double get xSuper => super.x;
-
-  /// Get y logic (ignoring master scale)
-  double get yLogic => super.y / masterScale;
-
-  double get ySuper => super.y;
-
-  /// Get logic size (ignoring master scale)
-  ImmutableVector2 get sizeLogic => ImmutableVector2.divide(super.size, masterScale);
-
-  NotifyingVector2 get sizeSuper => super.size;
-
-  /// Activate this on debug to validate access to position properties size, scale, x, y and position.
-  /// This is very CPU intensive, so never push to production
-  static const testingAccess = kDebugMode && false;
-
-  static final _testedAccesses = <String>{};
-
-  /// Test if the stack trace involves a child project or Rive Component, for debug reasons only
-  bool get testAccess {
-    final s = StackTrace.current.toString();
-
-    if (s.split('#') // split by lines
-      .whereNot((t) => t.contains('FieldChildComponent') || t.contains('MatchGame.update')) // ignore FieldChildComponent
-      .where((t) => t.contains(runtimeType.toString()) || t.contains('bfut_2')  || t.contains('RiveComponent'))
-      .isNotEmpty) {
-      if (_testedAccesses.add(s)) {
-
-        s.split('#') // split by lines
-            .where((t) => t.contains('FieldChildComponent') || t.contains('MatchGame.update')) // ignore FieldChildComponent
-            .forEach((t) => _logr.log(() => t));
-
-        s.split('#') // split by lines
-            .where((t) => !t.contains('FieldChildComponent')) // ignore FieldChildComponent
-            .where((t) => t.contains(runtimeType.toString()) || t.contains('bfut_2')  || t.contains('RiveComponent'))
-            .forEach((t) => _logr.log(() => t));
-
-        _logr.warn(() => 'TEST-ACCESS > ${_testedAccesses.length}');
-        return true;
-      }
-    }
-    return false;
-  }
-}
-
-extension PositionComponentExtension on PositionComponent {
-
-  ImmutableVector2 get positionLogic {
-    final t = this;
-    if (t is LogicPositionComponent) {
-      return t.positionLogic;
-    } else {
-      return position.toImmutable();
-    }
-  }
-
-  double get xLogic {
-    final t = this;
-    if (t is LogicPositionComponent) {
-      return t.xLogic;
-    } else {
-      return x;
-    }
-  }
-
-  double get yLogic {
-    final t = this;
-    if (t is LogicPositionComponent) {
-      return t.yLogic;
-    } else {
-      return y;
-    }
-  }
-
-  ImmutableVector2 get sizeLogic {
-    final t = this;
-    if (t is LogicPositionComponent) {
-      return t.sizeLogic;
-    } else {
-      return size.toImmutable();
-    }
-  }
-
-  NotifyingVector2 get sizeSuper {
-    final t = this;
-    if (t is LogicPositionComponent) {
-      return t.sizeSuper;
-    } else {
-      return size;
-    }
-  }
-
-  ImmutableVector2 get scaleLogic {
-    final t = this;
-    if (t is LogicPositionComponent) {
-      return t.scaleLogic;
-    } else {
-      return scale.toImmutable();
-    }
-  }
-}
-
-class RiveComponent extends PositionComponent with LogicPositionComponent {
   final Artboard artboard;
   final RiveArtboardRenderer _renderer;
   late Size _renderSize;
@@ -165,10 +116,15 @@ class RiveComponent extends PositionComponent with LogicPositionComponent {
 
     super.size.addListener(_updateRenderSize);
     _updateRenderSize();
+
+    transform.addListener(_onTransformChanged); // added to update logic vectors
   }
 
   @override
   final double masterScale;
+
+  late final _defaultScale = masterScale == 1.0;
+
   final String? debugId;
 
   @override
@@ -179,7 +135,7 @@ class RiveComponent extends PositionComponent with LogicPositionComponent {
 
   @override
   NotifyingVector2 get position {
-    if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to position > ${StackTrace.current}');
+    // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to position > ${StackTrace.current}');
     return super.position;
   }
 
@@ -191,7 +147,7 @@ class RiveComponent extends PositionComponent with LogicPositionComponent {
 
   @override
   NotifyingVector2 get scale {
-    if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to scale > ${StackTrace.current}');
+    // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to scale > ${StackTrace.current}');
     return super.scale;
   }
 
@@ -203,7 +159,7 @@ class RiveComponent extends PositionComponent with LogicPositionComponent {
 
   @override
   double get x {
-    if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to x > ${StackTrace.current}');
+    // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to x > ${StackTrace.current}');
     return super.x;
   }
 
@@ -215,7 +171,7 @@ class RiveComponent extends PositionComponent with LogicPositionComponent {
 
   @override
   double get y {
-    if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to y > ${StackTrace.current}');
+    // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to y > ${StackTrace.current}');
     return super.y;
   }
 
@@ -227,7 +183,7 @@ class RiveComponent extends PositionComponent with LogicPositionComponent {
 
   @override
   NotifyingVector2 get size {
-    if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to size > ${StackTrace.current}');
+    // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to size > ${StackTrace.current}');
     return super.size;
   }
 
@@ -261,6 +217,93 @@ class RiveComponent extends PositionComponent with LogicPositionComponent {
   @override
   void update(double dt) =>
       _renderer.advance(dt);
+
+  // copied from LogicPositionComponent
+
+  void _onTransformChanged() {
+    _scaleLogic = _positionLogic = null; // force rebuild of logic vectors
+  }
+
+  ImmutableVector2? _positionLogic;
+  /// Get logic position (ignoring master scale)
+  @override
+  NotifyingVector2 get positionLogic {
+    if (_defaultScale) return super.position;
+    return _positionLogic ??= ImmutableVector2.divide(super.position, masterScale);
+  }
+
+  // @override
+  // NotifyingVector2 get positionSuper => super.position;
+
+  ImmutableVector2? _scaleLogic;
+  /// Get logic scale (ignoring master scale)
+  @override
+  NotifyingVector2 get scaleLogic {
+    if (_defaultScale) return super.scale;
+    return _scaleLogic ??= ImmutableVector2.divide(super.scale, masterScale);
+  }
+
+  // @override
+  // NotifyingVector2 get scaleSuper => super.scale;
+
+  /// Get x logic (ignoring master scale)
+  @override
+  double get xLogic => super.x / masterScale;
+  // @override
+  // double get xLogic => positionLogic.x;
+
+  // double get xSuper => super.x;
+
+  /// Get y logic (ignoring master scale)
+  @override
+  double get yLogic => super.y / masterScale;
+  // @override
+  // double get yLogic => positionLogic.y;
+
+  // double get ySuper => super.y;
+
+  /// Get logic size (ignoring master scale)
+  @override
+  NotifyingVector2 get sizeLogic {
+    if (_defaultScale) return super.size;
+    return ImmutableVector2.divide(super.size, masterScale);
+  }
+
+  // @override
+  // NotifyingVector2 get sizeSuper => super.size;
+
+  // /// Activate this on debug to validate access to position properties size, scale, x, y and position.
+  // /// This is very CPU intensive, so never push to production
+  // // ignore: dead_code
+  // static const testingAccess = false && kDebugMode;
+  //
+  // static final _testedAccesses = <String>{};
+  //
+  // /// Test if the stack trace involves a child project or Rive Component, for debug reasons only
+  // bool get testAccess {
+  //   final s = StackTrace.current.toString();
+  //
+  //   if (s.split('#') // split by lines
+  //       .whereNot((t) => t.contains('FieldChildComponent') || t.contains('MatchGame.update')) // ignore FieldChildComponent
+  //       .where((t) => t.contains(runtimeType.toString()) || t.contains('bfut_2')  || t.contains('RiveComponent'))
+  //       .isNotEmpty) {
+  //     if (_testedAccesses.add(s)) {
+  //
+  //       s.split('#') // split by lines
+  //           .where((t) => t.contains('FieldChildComponent') || t.contains('MatchGame.update')) // ignore FieldChildComponent
+  //           .forEach((t) => _logr.log(() => t));
+  //
+  //       s.split('#') // split by lines
+  //           .where((t) => !t.contains('FieldChildComponent')) // ignore FieldChildComponent
+  //           .where((t) => t.contains(runtimeType.toString()) || t.contains('bfut_2')  || t.contains('RiveComponent'))
+  //           .forEach((t) => _logr.log(() => t));
+  //
+  //       _logr.warn(() => 'TEST-ACCESS > ${_testedAccesses.length}');
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // }
 }
 
 class RiveArtboardRenderer {

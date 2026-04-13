@@ -88,7 +88,9 @@ class PositionComponent extends Component
     super.key,
   }) : transform = Transform2D(),
        _anchor = anchor ?? Anchor.topLeft,
-       _size = NotifyingVector2.copy(size ?? Vector2.zero()) {
+       // _size = NotifyingVector2.copy(size ?? Vector2.zero())
+      _size = SingleListenerNotifyingVector2(size?.x??0, size?.y??0)
+  {
     decorator = Transform2DDecorator(transform);
     if (position != null) {
       transform.position = position;
@@ -584,4 +586,18 @@ $runtimeType(
   scale: $scale,
 )''';
   }
+
+  double get masterScale => 1.0;
+
+  NotifyingVector2 get positionLogic => transform.position;
+  NotifyingVector2 get positionSuper => transform.position;
+
+  double get xLogic => transform.x;
+  double get yLogic => transform.y;
+
+  NotifyingVector2 get sizeLogic => _size;
+  NotifyingVector2 get sizeSuper => _size;
+
+  NotifyingVector2 get scaleLogic => transform.scale;
+  NotifyingVector2 get scaleSuper => transform.scale;
 }
