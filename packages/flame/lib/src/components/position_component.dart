@@ -1,3 +1,5 @@
+// ignore_for_file: always_put_control_body_on_new_line
+
 import 'dart:math' as math;
 
 import 'package:flame/camera.dart';
@@ -12,6 +14,10 @@ import 'package:flame/src/game/transform2d.dart';
 import 'package:flame/src/rendering/decorator.dart';
 import 'package:flame/src/rendering/transform2d_decorator.dart';
 import 'package:meta/meta.dart';
+import 'package:plato/plato.dart' hide ListExtension;
+
+// ignore: unused_element
+const _logr = Logr(true, prefix: 'position_component');
 
 /// A [Component] implementation that represents an object that can be
 /// freely moved around the screen, rotated, and scaled.
@@ -82,7 +88,9 @@ class PositionComponent extends Component
     super.key,
   }) : transform = Transform2D(),
        _anchor = anchor ?? Anchor.topLeft,
-       _size = NotifyingVector2.copy(size ?? Vector2.zero()) {
+       // _size = NotifyingVector2.copy(size ?? Vector2.zero())
+      _size = SingleListenerNotifyingVector2(size?.x??0, size?.y??0)
+  {
     decorator = Transform2DDecorator(transform);
     if (position != null) {
       transform.position = position;
@@ -208,6 +216,7 @@ class PositionComponent extends Component
   /// may visually appear larger or smaller due to application of [scale].
   double get height => _size.y;
   set height(double h) => _size.y = h;
+
 
   /// The "physical" size of the component. This is the size of the
   /// component as seen from the parent's perspective, and it is equal to
@@ -577,4 +586,18 @@ $runtimeType(
   scale: $scale,
 )''';
   }
+
+  double get masterScale => 1.0;
+
+  NotifyingVector2 get positionLogic => transform.position;
+  NotifyingVector2 get positionSuper => transform.position;
+
+  double get xLogic => transform.x;
+  double get yLogic => transform.y;
+
+  NotifyingVector2 get sizeLogic => _size;
+  NotifyingVector2 get sizeSuper => _size;
+
+  NotifyingVector2 get scaleLogic => transform.scale;
+  NotifyingVector2 get scaleSuper => transform.scale;
 }

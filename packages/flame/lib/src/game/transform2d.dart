@@ -1,9 +1,15 @@
+// ignore_for_file: always_put_control_body_on_new_line
+
 import 'dart:math' as math;
 
 import 'package:flame/geometry.dart' as geometry;
 import 'package:flame/src/game/notifying_vector2.dart';
 import 'package:flutter/foundation.dart';
+import 'package:plato/plato.dart';
 import 'package:vector_math/vector_math.dart';
+
+// ignore: unused_element
+const _logr = Logr(true, prefix: 'transform2d');
 
 /// This class describes a generic 2D transform, which is a combination of
 /// translations, rotations, reflections and scaling. These transforms are
@@ -32,6 +38,7 @@ class Transform2D extends ChangeNotifier {
   final Matrix4 _transformMatrix;
   bool _recalculate;
   double _angle;
+
   final NotifyingVector2 _position;
   final NotifyingVector2 _scale;
   final NotifyingVector2 _offset;
@@ -40,9 +47,13 @@ class Transform2D extends ChangeNotifier {
     : _transformMatrix = Matrix4.identity(),
       _recalculate = true,
       _angle = 0,
-      _position = NotifyingVector2.zero(),
-      _scale = NotifyingVector2.all(1),
-      _offset = NotifyingVector2.zero() {
+      // _position = NotifyingVector2.zero(),
+      // _scale = NotifyingVector2.all(1),
+      // _offset = NotifyingVector2.zero()
+      _position = SingleListenerNotifyingVector2(0,0),
+      _scale = SingleListenerNotifyingVector2(1,1),
+      _offset = SingleListenerNotifyingVector2(0,0)
+  {
     _position.addListener(_markAsModified);
     _scale.addListener(_markAsModified);
     _offset.addListener(_markAsModified);
@@ -101,11 +112,15 @@ class Transform2D extends ChangeNotifier {
   double get y => _position.y;
   set y(double y) => _position.y = y;
 
+  // static var _notifyCount = 0;
+
   /// The rotation part of the transform. This represents rotation around
   /// the [position] point in clockwise direction by [angle] radians. If
   /// the angle is negative then the rotation is counterclockwise.
   double get angle => _angle;
   set angle(double a) {
+    if (_angle == a) return;
+    // if (_notifyCount++ % 100 == 0) _logr.always.log(() => 'SET-ANGLE > $_notifyCount > ${caller(2)}');
     _angle = a;
     _markAsModified();
   }
@@ -113,8 +128,9 @@ class Transform2D extends ChangeNotifier {
   /// Similar to [angle], but uses degrees instead of radians.
   double get angleDegrees => _angle * (360 / geometry.tau);
   set angleDegrees(double a) {
-    _angle = a * (geometry.tau / 360);
-    _markAsModified();
+    angle = a * (geometry.tau / 360);
+    // _angle = a * (geometry.tau / 360);
+    // _markAsModified();
   }
 
   /// The scale part of the transform. The default scale factor is (1, 1),
@@ -165,12 +181,16 @@ class Transform2D extends ChangeNotifier {
       final m = _transformMatrix.storage;
       final cosA = math.cos(_angle);
       final sinA = math.sin(_angle);
-      m[0] = cosA * _scale.x;
-      m[1] = sinA * _scale.x;
-      m[4] = -sinA * _scale.y;
-      m[5] = cosA * _scale.y;
-      m[12] = _position.x + m[0] * _offset.x + m[4] * _offset.y;
-      m[13] = _position.y + m[1] * _offset.x + m[5] * _offset.y;
+      final sx = _scale.x;
+      final m0 = m[0] = cosA * sx;
+      final m1 = m[1] = sinA * sx;
+      final sy = _scale.y;
+      final m4 = m[4] = -sinA * sy;
+      final m5 = m[5] = cosA * sy;
+      final ox = _offset.x;
+      final oy = _offset.y;
+      m[12] = _position.x + m0 * ox + m4 * oy;
+      m[13] = _position.y + m1 * ox + m5 * oy;
       _recalculate = false;
     }
     return _transformMatrix;
@@ -183,8 +203,10 @@ class Transform2D extends ChangeNotifier {
   /// creating a new Vector2 object in this method.
   Vector2 localToGlobal(Vector2 point, {Vector2? output}) {
     final m = transformMatrix.storage;
-    final x = m[0] * point.x + m[4] * point.y + m[12];
-    final y = m[1] * point.x + m[5] * point.y + m[13];
+    final px = point.x;
+    final py = point.y;
+    final x = m[0] * px + m[4] * py + m[12];
+    final y = m[1] * px + m[5] * py + m[13];
     return (output?..setValues(x, y)) ?? Vector2(x, y);
   }
 
@@ -206,8 +228,12 @@ class Transform2D extends ChangeNotifier {
     if (det != 0) {
       det = 1 / det;
     }
-    final x = ((point.x - m[12]) * m[5] - (point.y - m[13]) * m[4]) * det;
-    final y = ((point.y - m[13]) * m[0] - (point.x - m[12]) * m[1]) * det;
+    final px = point.x;
+    final py = point.y;
+    final m12 = m[12];
+    final m13 = m[13];
+    final x = ((px - m12) * m[5] - (py - m13) * m[4]) * det;
+    final y = ((py - m13) * m[0] - (px - m12) * m[1]) * det;
     return (output?..setValues(x, y)) ?? Vector2(x, y);
   }
 
@@ -231,6 +257,7 @@ class Transform2D extends ChangeNotifier {
   bool get hasReflection => _scale.x.sign * _scale.y.sign == -1;
 
   void _markAsModified() {
+    if (_recalculate) return; // already flagged
     _recalculate = true;
     notifyListeners();
   }
