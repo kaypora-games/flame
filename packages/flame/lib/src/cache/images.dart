@@ -85,7 +85,6 @@ class Images {
       name,
       imageGenerator(),
     )).retrieveAsync();
-  }
 
   /// Removes the image [name] from the cache.
   ///
