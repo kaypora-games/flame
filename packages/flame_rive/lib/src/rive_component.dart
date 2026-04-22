@@ -217,7 +217,7 @@ class RiveComponent
   @override
   void update(double dt) {
     _renderer.advance(dt);
-    if (!_renderer.artboard.advanceSane) {
+    if (!_renderer.artboard.advanceSane) { // can be ignored as this is present in fork of rive project
       _logr.info('ARTBOARD-ADVANCE-FAILED > $debugName');
     }
   }
