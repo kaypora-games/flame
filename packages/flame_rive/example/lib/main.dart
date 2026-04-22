@@ -18,7 +18,7 @@ class RiveExampleGame extends FlameGame {
 }
 
 class SkillsAnimationComponent extends RiveComponent with TapCallbacks {
-  SkillsAnimationComponent(Artboard artboard) : super(artboard: artboard);
+  SkillsAnimationComponent(Artboard artboard) : super(artboard: artboard, debugName: 'skills');
 
   SMIInput<double>? _levelInput;
 

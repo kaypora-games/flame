@@ -9,7 +9,7 @@ import 'package:plato/plato.dart';
 import 'package:rive/math.dart';
 import 'package:rive/rive.dart';
 
-const _logr = Logr(true, prefix: 'rive-component');
+const _logr = Logr.always(prefix: 'rive-component');
 
 // mixin LogicPositionComponent on PositionComponent {
 //
@@ -105,7 +105,7 @@ class RiveComponent
     super.children,
     super.priority,
     super.key,
-    this.debugId,
+    required this.debugName,
   }) : _renderer = RiveArtboardRenderer(
     antialiasing: antialiasing,
     fit: fit,
@@ -125,7 +125,7 @@ class RiveComponent
 
   late final _defaultScale = masterScale == 1.0;
 
-  final String? debugId;
+  final String debugName;
 
   @override
   set position(Vector2 position) {
@@ -133,11 +133,11 @@ class RiveComponent
     // if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > POSITION > $position >> ${positionSuper}');
   }
 
-  @override
-  NotifyingVector2 get position {
-    // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to position > ${StackTrace.current}');
-    return super.position;
-  }
+  // @override
+  // NotifyingVector2 get position {
+  //   // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to position > ${StackTrace.current}');
+  //   return super.position;
+  // }
 
   @override
   set scale(Vector2 scale) {
@@ -145,11 +145,11 @@ class RiveComponent
     // if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > SCALE > $scale >> ${scaleSuper}');
   }
 
-  @override
-  NotifyingVector2 get scale {
-    // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to scale > ${StackTrace.current}');
-    return super.scale;
-  }
+  // @override
+  // NotifyingVector2 get scale {
+  //   // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to scale > ${StackTrace.current}');
+  //   return super.scale;
+  // }
 
   @override
   set x(double x) {
@@ -157,11 +157,11 @@ class RiveComponent
     // if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > X > $x >> ${this.x}');
   }
 
-  @override
-  double get x {
-    // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to x > ${StackTrace.current}');
-    return super.x;
-  }
+  // @override
+  // double get x {
+  //   // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to x > ${StackTrace.current}');
+  //   return super.x;
+  // }
 
   @override
   set y(double y) {
@@ -169,11 +169,11 @@ class RiveComponent
     // if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > Y > $y >> ${this.y}');
   }
 
-  @override
-  double get y {
-    // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to y > ${StackTrace.current}');
-    return super.y;
-  }
+  // @override
+  // double get y {
+  //   // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to y > ${StackTrace.current}');
+  //   return super.y;
+  // }
 
   @override
   set size(Vector2 size) {
@@ -181,11 +181,11 @@ class RiveComponent
     // if (debugId?.contains('fan_crowd_line')??false) _logr.log(() => 'RIVE-COMPONENT > SIZE > $size >> ${this.size}');
   }
 
-  @override
-  NotifyingVector2 get size {
-    // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to size > ${StackTrace.current}');
-    return super.size;
-  }
+  // @override
+  // NotifyingVector2 get size {
+  //   // if (LogicPositionComponent.testingAccess && testAccess) _logr.log(() => 'REVIEW $runtimeType call to size > ${StackTrace.current}');
+  //   return super.size;
+  // }
 
   @override
   set center(Vector2 point) {
@@ -215,8 +215,13 @@ class RiveComponent
       _renderer.render(canvas, _renderSize);
 
   @override
-  void update(double dt) =>
-      _renderer.advance(dt);
+  void update(double dt) {
+    _renderer.advance(dt);
+    if (!_renderer.artboard.advanceSane) {
+      _logr.info('ARTBOARD-ADVANCE-FAILED > $debugName');
+    }
+  }
+
 
   // copied from LogicPositionComponent
 

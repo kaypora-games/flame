@@ -114,6 +114,7 @@ void main() {
         test('Default value', () async {
           final skillsArtboard = await loadArtboard(riveFile);
           final riveComponent = RiveComponent(
+            debugName: 'test',
             artboard: skillsArtboard,
           );
 
@@ -123,6 +124,7 @@ void main() {
         test('Can change to false', () async {
           final skillsArtboard = await loadArtboard(riveFile);
           final riveComponent = RiveComponent(
+            debugName: 'test',
             artboard: skillsArtboard,
             antialiasing: false,
           );
@@ -135,6 +137,7 @@ void main() {
         test('use specific size', () async {
           final skillsArtboard = await loadArtboard(riveFile);
           final riveComponent = RiveComponent(
+            debugName: 'test',
             artboard: skillsArtboard,
             size: Vector2.all(250.0),
           );
@@ -144,7 +147,7 @@ void main() {
 
         test('default value (ArtboardSize)', () async {
           final skillsArtboard = await loadArtboard(riveFile);
-          final riveComponent = RiveComponent(artboard: skillsArtboard);
+          final riveComponent = RiveComponent(debugName: 'test', artboard: skillsArtboard);
 
           expect(
             riveComponent.size,
@@ -157,11 +160,11 @@ void main() {
 }
 
 class _RiveComponent extends RiveComponent {
-  _RiveComponent({required super.artboard});
+  _RiveComponent({required super.artboard, super.debugName = 'test'});
 }
 
 class _RiveComponentWithAnimation extends RiveComponent {
-  _RiveComponentWithAnimation({required super.artboard});
+  _RiveComponentWithAnimation({required super.artboard, super.debugName = 'test'});
 
   @override
   Future<void>? onLoad() async {
@@ -176,5 +179,5 @@ class _RiveComponentWithAnimation extends RiveComponent {
 }
 
 class _RiveComponentWithTappable extends RiveComponent with TapCallbacks {
-  _RiveComponentWithTappable({required super.artboard});
+  _RiveComponentWithTappable({required super.artboard, super.debugName = 'test'});
 }

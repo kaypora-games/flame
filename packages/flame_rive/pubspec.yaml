@@ -18,7 +18,7 @@ environment:
 
 dependencies:
   collection: ^1.19.1
-  flame: ^1.34.0 # pinned to stokanal
+  flame: # ^1.34.0 # pinned to stokanal
   flutter:
     sdk: flutter
   plato:
@@ -30,3 +30,8 @@ dev_dependencies:
   flame_test: ^2.2.0
   flutter_test:
     sdk: flutter
+
+#dependency_overrides:
+#
+#  flame:
+#    path: ../flame/
