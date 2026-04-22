@@ -18,12 +18,11 @@ class ModelComponent extends Object3D {
     super.position,
     super.rotation,
     super.scale,
+    super.children,
   });
 
-  Aabb3 get aabb => _aabb
-    ..setFrom(model.aabb)
-    ..transform(transformMatrix);
-  final Aabb3 _aabb = Aabb3();
+  @override
+  Aabb3? computeLocalAabb() => model.aabb;
 
   @override
   void bind(GraphicsDevice device) {
@@ -35,9 +34,11 @@ class ModelComponent extends Object3D {
 
       final mesh = node.node.mesh;
       if (mesh != null) {
-        device.jointsInfo.jointTransformsPerSurface = node.jointTransforms;
-        world.device
-          ..model.setFrom(transformMatrix.multiplied(node.combinedTransform))
+        device
+          ..jointsInfo.jointTransformsPerSurface = node.jointTransforms
+          ..model.setFrom(
+            worldTransformMatrix.multiplied(node.combinedTransform),
+          )
           ..bindMesh(mesh);
       }
     }

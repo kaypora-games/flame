@@ -10,6 +10,8 @@ workspace:
   - packages/flame_behavior_tree
   - packages/flame_behavior_tree/behavior_tree
   - packages/flame_behavior_tree/example
+  - packages/flame_gamepads
+  - packages/flame_gamepads/example
   - packages/flame_test
   - packages/flame_test/example
   - packages/flame_tiled
@@ -56,6 +58,8 @@ workspace:
   - packages/flame_riverpod/example
   - packages/flame_svg
   - packages/flame_svg/example
+  - packages/flame_typled
+  - packages/flame_typled/example
   - packages/flame_network_assets
   - packages/flame_network_assets/example
   - packages/flame_3d
@@ -69,7 +73,7 @@ workspace:
   - examples
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  sdk: ">=3.11.0 <4.0.0"
 
 dependency_overrides:
 
@@ -80,7 +84,7 @@ dependency_overrides:
       # ref: main
 
 dev_dependencies:
-  melos: ^7.0.0-dev.10
+  melos: ^7.4.0
 
 melos:
   command:
@@ -94,13 +98,13 @@ melos:
 
     bootstrap:
       environment:
-        sdk: ">=3.8.0 <4.0.0"
-        flutter: ">=3.32.0"
+        sdk: ">=3.11.0 <4.0.0"
+        flutter: ">=3.41.0"
       dependencies:
         meta: ^1.12.0
         vector_math: ^2.1.4
       dev_dependencies:
-        dartdoc: ^8.0.8
+        dartdoc: ^9.0.0
         mocktail: ^1.0.4
         test: any
 
@@ -160,7 +164,7 @@ melos:
       description: Checks whether there are any broken links in the docs.
 
     test:select:
-      run: melos exec -c 1 -- flutter test
+      run: melos exec -c 1 -- flutter test --reporter=json 2>&1 | dart run "$MELOS_ROOT_PATH/scripts/test_formatter.dart"
       packageFilters:
         dirExists: test
       description: Run `flutter test` for selected packages.

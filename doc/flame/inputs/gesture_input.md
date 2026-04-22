@@ -19,6 +19,10 @@ of these `mixin`s and its methods:
 
 ## Touch and mouse detectors
 
+```{warning}
+Detectors will be deprecated in the future. Prefer `Callbacks` instead.
+```
+
 ```text
 - TapDetector
   - onTap
@@ -108,8 +112,8 @@ Flame's GestureApi is provided by Flutter's Gesture Widgets, including
 [GestureDetector widget](https://api.flutter.dev/flutter/widgets/GestureDetector-class.html),
 [RawGestureDetector widget](https://api.flutter.dev/flutter/widgets/RawGestureDetector-class.html)
 and [MouseRegion widget](https://api.flutter.dev/flutter/widgets/MouseRegion-class.html), you can
-also read more about Flutter's gestures
-[here](https://api.flutter.dev/flutter/gestures/gestures-library.html).
+also read more about
+[Flutter's gesture system](https://api.flutter.dev/flutter/gestures/gestures-library.html).
 
 
 ## PanDetector and ScaleDetector
@@ -222,8 +226,8 @@ class MyGame extends FlameGame with TapDetector {
 }
 ```
 
-You can also check more complete examples
-[here](https://github.com/flame-engine/flame/tree/main/examples/lib/stories/input/).
+You can also check more complete examples in the
+[input examples directory](https://github.com/flame-engine/flame/tree/main/examples/lib/stories/input/).
 
 
 ### GestureHitboxes
@@ -241,5 +245,5 @@ added in the below `Collidable` example.
 More information about how to define hitboxes can be found in the hitbox section of the
 [collision detection](../collision_detection.md#shapehitbox) docs.
 
-An example of how to use it can be seen
-[here](https://github.com/flame-engine/flame/blob/main/examples/lib/stories/input/gesture_hitboxes_example.dart).
+An example of how to use it can be seen in the
+[gesture hitboxes example](https://github.com/flame-engine/flame/blob/main/examples/lib/stories/input/gesture_hitboxes_example.dart).

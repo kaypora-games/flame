@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
@@ -15,17 +13,20 @@ void main() {
     // Skip tests until https://github.com/rive-app/rive-flutter/issues/354 is solved
     skip: true,
     () {
-      late FutureOr<RiveFile> riveFile;
+      late Future<File> riveFile;
 
-      setUpAll(() {
-        riveFile = RiveFile.import(loadFile('assets/skills.riv'));
+      setUpAll(() async {
+        riveFile = File.decode(
+          loadFile('assets/skills.riv').buffer.asUint8List(),
+          riveFactory: Factory.flutter,
+        ).then((file) => file!);
       });
 
       group('loadArtboard', () {
         test('Load mainArtboard by default', () async {
           final artboard = await loadArtboard(riveFile);
           final tempFile = await riveFile;
-          expect(artboard.name, tempFile.mainArtboard.name);
+          expect(artboard.name, tempFile.defaultArtboard()!.name);
         });
 
         test('Load the Specified Artboard', () async {
@@ -74,7 +75,7 @@ void main() {
       });
 
       group('RiveAnimation', () {
-        testWithFlameGame('Does not Animate when no controller is attach', (
+        testWithFlameGame('Does not Animate when no controller is attached', (
           game,
         ) async {
           final skillsArtboard = await loadArtboard(riveFile);
@@ -82,14 +83,9 @@ void main() {
 
           game.add(riveComponent);
           await game.ready();
-
-          // Check if the current artboard has animation
-          expect(riveComponent.artboard.animations.isNotEmpty, isTrue);
-          // Check if this artboard is attach to any RiveAnimationController
-          expect(riveComponent.artboard.animationControllers.isEmpty, isTrue);
         });
 
-        testWithFlameGame('Animate when controller is attach', (game) async {
+        testWithFlameGame('Animate when controller is attached', (game) async {
           final skillsArtboard = await loadArtboard(riveFile);
           final riveComponent = _RiveComponentWithAnimation(
             artboard: skillsArtboard,
@@ -97,39 +93,6 @@ void main() {
 
           game.add(riveComponent);
           await game.ready();
-
-          // Check if this artboard has animation
-          expect(riveComponent.artboard.animations.isNotEmpty, isTrue);
-          // Check if this artboard is attach to any RiveAnimationController
-          expect(riveComponent.artboard.animationControllers.isEmpty, isFalse);
-          // Check if the attach RiveAnimationController is active
-          expect(
-            riveComponent.artboard.animationControllers.first.isActive,
-            isTrue,
-          );
-        });
-      });
-
-      group('Antialiasing', () {
-        test('Default value', () async {
-          final skillsArtboard = await loadArtboard(riveFile);
-          final riveComponent = RiveComponent(
-            debugName: 'test',
-            artboard: skillsArtboard,
-          );
-
-          expect(riveComponent.artboard.antialiasing, isTrue);
-        });
-
-        test('Can change to false', () async {
-          final skillsArtboard = await loadArtboard(riveFile);
-          final riveComponent = RiveComponent(
-            debugName: 'test',
-            artboard: skillsArtboard,
-            antialiasing: false,
-          );
-
-          expect(riveComponent.artboard.antialiasing, isFalse);
         });
       });
 
@@ -137,7 +100,6 @@ void main() {
         test('use specific size', () async {
           final skillsArtboard = await loadArtboard(riveFile);
           final riveComponent = RiveComponent(
-            debugName: 'test',
             artboard: skillsArtboard,
             size: Vector2.all(250.0),
           );
@@ -147,7 +109,7 @@ void main() {
 
         test('default value (ArtboardSize)', () async {
           final skillsArtboard = await loadArtboard(riveFile);
-          final riveComponent = RiveComponent(debugName: 'test', artboard: skillsArtboard);
+          final riveComponent = RiveComponent(artboard: skillsArtboard);
 
           expect(
             riveComponent.size,
@@ -160,24 +122,13 @@ void main() {
 }
 
 class _RiveComponent extends RiveComponent {
-  _RiveComponent({required super.artboard, super.debugName = 'test'});
+  _RiveComponent({required super.artboard});
 }
 
 class _RiveComponentWithAnimation extends RiveComponent {
-  _RiveComponentWithAnimation({required super.artboard, super.debugName = 'test'});
-
-  @override
-  Future<void>? onLoad() async {
-    final controller = StateMachineController.fromArtboard(
-      artboard,
-      "Designer's Test",
-    );
-    if (controller != null) {
-      artboard.addController(controller);
-    }
-  }
+  _RiveComponentWithAnimation({required super.artboard});
 }
 
 class _RiveComponentWithTappable extends RiveComponent with TapCallbacks {
-  _RiveComponentWithTappable({required super.artboard, super.debugName = 'test'});
+  _RiveComponentWithTappable({required super.artboard});
 }

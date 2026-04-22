@@ -85,6 +85,7 @@ class Images {
       name,
       imageGenerator(),
     )).retrieveAsync();
+  }
 
   /// Removes the image [name] from the cache.
   ///
@@ -132,11 +133,11 @@ class Images {
   /// Loads the specified image with [fileName] into the cache.
   /// By default the key in the cache is the [fileName], if another key is
   /// desired, specify the optional [key] argument.
-  Future<Image> load(String fileName, {String? key}) =>
-    _assets.putIfAbsent(key ?? fileName, (_) => _ImageAsset.future(
-      fileName,
-      _fetchToMemory(fileName),
-    )).retrieveAsync();
+  Future<Image> load(String fileName, {String? key, String? package}) =>
+      _assets.putIfAbsent(key ?? fileName, (_) => _ImageAsset.future(
+        fileName,
+        _fetchToMemory(fileName),
+      )).retrieveAsync();
 
   /// Loads all images with the specified [fileNames] into the cache.
   Future<List<Image>> loadAll(List<String> fileNames) {
@@ -201,8 +202,9 @@ class Images {
     return decodeImageFromList(bytes);
   }
 
-  Future<Image> _fetchToMemory(String name) async {
-    final bytes = await Plato().provider.assetLoader.loadBytes('$_prefix$name');
+  Future<Image> _fetchToMemory(String name, {String? package}) async {
+    final prefix = package == null ? _prefix : 'packages/$package/$_prefix';
+    final bytes = await Plato().provider.assetLoader.loadBytes('$prefix$name');
     // final watch = Stopwatch()..start();
     // final data = await bundle.load('$_prefix$name');
     // _logr.log(() => '_fetchToMemory LOAD > $name > ${watch.elapsedMilliseconds}');

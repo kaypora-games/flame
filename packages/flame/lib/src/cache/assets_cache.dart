@@ -51,47 +51,46 @@ class AssetsCache {
   int get cacheCount => _files.length;
 
   /// Reads a file from assets folder.
-  Future<String> readFile(String fileName) async {
-    var asset = _files[fileName];
-    asset ??= _files[fileName] = await _readFile(fileName);
+  Future<String> readFile(String fileName, {String? package}) async {
+    final cacheKey = package == null ? fileName : 'packages/$package/$fileName';
+    var asset = _files[cacheKey];
+    asset ??= _files[cacheKey] = await _readFile(cacheKey, package: package);
     return (asset as _StringAsset).value;
   }
 
   /// Reads a binary file from assets folder.
-  Future<Uint8List> readBinaryFile(String fileName) async {
-    var asset = _files[fileName];
-    asset ??= _files[fileName] = await _readBinary(fileName);
+  Future<Uint8List> readBinaryFile(String fileName, {String? package}) async {
+    final cacheKey = package == null ? fileName : 'packages/$package/$fileName';
+    var asset = _files[cacheKey];
+    asset ??= _files[cacheKey] = await _readBinary(cacheKey, package: package);
     return (asset as _BinaryAsset).value;
   }
 
   /// Reads a json file from the assets folder.
-  Future<Map<String, dynamic>> readJson(String fileName) async {
-    var asset = _files[fileName];
-    asset ??= _files[fileName] = await _readJson(fileName);
+  Future<Map<String, dynamic>> readJson(String fileName, {String? package}) async {
+    final cacheKey = package == null ? fileName : 'packages/$package/$fileName';
+    var asset = _files[cacheKey];
+    asset ??= _files[cacheKey] = await _readJson(cacheKey, package: package);
     return (asset as _JsonAsset).value;
   }
 
-  Future<_StringAsset> _readFile(String fileName) async {
-    final asset = _StringAsset(await bundle.loadString('$prefix$fileName'));
+  Future<_StringAsset> _readFile(String fileName, {String? package}) async {
+    final fullPrefix = package == null ? prefix : 'packages/$package/$prefix';
+    final asset = _StringAsset(await bundle.loadString('$fullPrefix$fileName'));
     _logr.log(() => 'READ-FILE > $asset');
     return asset;
   }
 
-  Future<_BinaryAsset> _readBinary(String fileName) async {
-    // final data = await bundle.load('$prefix$fileName');
-    // final bytes = Uint8List.view(data.buffer);
-    // return _BinaryAsset(bytes);
-    final asset = _BinaryAsset(Uint8List.view((await bundle.load('$prefix$fileName')).buffer));
+  Future<_BinaryAsset> _readBinary(String fileName, {String? package}) async {
+    final fullPrefix = package == null ? prefix : 'packages/$package/$prefix';
+    final asset = _BinaryAsset(Uint8List.view((await bundle.load('$fullPrefix$fileName')).buffer));
     _logr.log(() => 'READ-BINARY > $asset');
     return asset;
   }
 
-  Future<_JsonAsset> _readJson(String fileName) async {
-    // final string = await bundle.loadString('$prefix$fileName');
-    // final json = jsonDecode(string) as Map<String, dynamic>;
-    // return _JsonAsset(json);
-
-    final asset = _JsonAsset(jsonDecode(await bundle.loadString('$prefix$fileName')) as Map<String, dynamic>);
+  Future<_JsonAsset> _readJson(String fileName, {String? package}) async {
+    final fullPrefix = package == null ? prefix : 'packages/$package/$prefix';
+    final asset = _JsonAsset(jsonDecode(await bundle.loadString('$fullPrefix$fileName')) as Map<String, dynamic>);
     _logr.log(() => 'READ-JSON > $asset');
     return asset;
   }

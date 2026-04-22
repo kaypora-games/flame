@@ -578,6 +578,37 @@ class Component {
 
   void render(Canvas canvas) {}
 
+  /// Renders a single [child] component onto [canvas].
+  ///
+  /// Override this method (instead of [renderTree]) when you need to intercept
+  /// per-child rendering — for example, to accumulate draw calls for batching.
+  /// The default implementation propagates the parent's render contexts into
+  /// the child before delegating to the child's [Component.renderTree], and
+  /// cleans them up afterwards.
+  @protected
+  void renderChild(Canvas canvas, Component child) {
+    int? originalLength;
+    final hasContext = _renderContexts.isNotEmpty;
+    if (hasContext) {
+      originalLength = child._renderContexts.length;
+      child._renderContexts.addAll(_renderContexts);
+    }
+    child.renderTree(canvas);
+    if (hasContext) {
+      child._renderContexts.removeRange(
+        originalLength!,
+        child._renderContexts.length,
+      );
+    }
+  }
+
+  /// Called once after all children have been rendered in [renderTree].
+  ///
+  /// Override to flush any state accumulated across [renderChild] calls
+  /// (e.g. a pending sprite batch).
+  @protected
+  void afterChildrenRendered(Canvas canvas) {}
+
   void renderTree(Canvas canvas) {
     final context = renderContext;
     if (context != null) {
@@ -588,18 +619,9 @@ class Component {
     final children = _children;
     if (children != null) {
       for (final child in children) {
-        final hasContext = _renderContexts.isNotEmpty;
-        if (hasContext) {
-          child._renderContexts.addAll(_renderContexts);
-        }
-        child.renderTree(canvas);
-        if (hasContext) {
-          child._renderContexts.removeRange(
-            _renderContexts.length,
-            child._renderContexts.length,
-          );
-        }
+        renderChild(canvas, child);
       }
+      afterChildrenRendered(canvas);
     }
 
     // Any debug rendering should be rendered on top of everything
@@ -742,6 +764,13 @@ class Component {
         }
       } else if (!child.isRemoved) {
         root.dequeueAdd(child, this);
+        child._parent = null;
+      } else if (isRemoving) {
+        // This parent is being removed from the tree, and the child was
+        // already marked as removed during ancestor removal propagation.
+        // The child is now being explicitly removed by user code (e.g.
+        // via removeAll(children) in onRemove), so detach it.
+        _internalChildren.remove(child);
         child._parent = null;
       }
     } else {
@@ -951,6 +980,28 @@ class Component {
     }
   }
 
+  /// Called when Flutter's hot reload is triggered.
+  ///
+  /// Override this method to reload assets, recalculate cached values,
+  /// or perform other actions in response to hot reload.
+  ///
+  /// This is only called in debug mode.
+  @mustCallSuper
+  void onHotReload() => handleHotReload();
+
+  @mustCallSuper
+  @internal
+  void handleHotReload() {
+    final children = _children;
+    if (children != null) {
+      for (final child in children) {
+        if (child.isLoading || child.isLoaded) {
+          child.onHotReload();
+        }
+      }
+    }
+  }
+
   FutureOr<void> _startLoading() {
     assert(_state == _initial);
     assert(_parent != null);
@@ -1013,6 +1064,7 @@ class Component {
 
   /// Used by [_reAddChildren].
   static final List<Component> _tmpChildren = [];
+  static final Set<Component> _tmpPendingRemoves = {};
 
   /// At the end of mounting, we remove all children components and then re-add
   /// them one-by-one. The reason for this is that before the current component
@@ -1026,11 +1078,17 @@ class Component {
       assert(_tmpChildren.isEmpty);
       _tmpChildren.addAll(_children!);
       _children!.clear();
+      assert(_tmpPendingRemoves.isEmpty);
+      findGame()?.cancelQueuedRemoves(_tmpChildren, _tmpPendingRemoves);
       for (final child in _tmpChildren) {
         child._parent = null;
+        if (_tmpPendingRemoves.contains(child)) {
+          continue;
+        }
         _addChild(child);
       }
       _tmpChildren.clear();
+      _tmpPendingRemoves.clear();
     }
   }
 
