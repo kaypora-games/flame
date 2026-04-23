@@ -19,6 +19,21 @@ enum DepthStencilState {
   none,
 }
 
+/// Face culling mode. Controls which triangle faces are discarded before
+/// rasterization.
+///
+/// Assign to [Material.cullMode] to control per-material culling.
+enum CullMode {
+  /// No culling, both front and back faces are rendered.
+  none,
+
+  /// Cull front-facing triangles (render only back faces).
+  frontFace,
+
+  /// Cull back-facing triangles (render only front faces).
+  backFace,
+}
+
 /// {@template graphics_device}
 /// The Graphical Device provides a way for developers to interact with the GPU
 /// by binding different resources to it.
@@ -61,7 +76,7 @@ class GraphicsDevice {
 
   /// Must be set by the rendering pipeline before elements are bound.
   /// Can be accessed by elements in their bind method.
-  final LightingInfo lightingInfo = LightingInfo();
+  Iterable<Light> lights = [];
 
   /// Begin a new rendering batch.
   ///
@@ -81,12 +96,13 @@ class GraphicsDevice {
     _hostBuffer = _gpuContext.createHostBuffer();
 
     _renderPass = _commandBuffer.createRenderPass(_getRenderTarget(size))
+      ..setWindingOrder(gpu.WindingOrder.counterClockwise)
       ..setColorBlendEnable(true)
       ..setColorBlendEquation(
         gpu.ColorBlendEquation(
-          sourceAlphaBlendFactor: blendState == BlendState.alphaBlend
+          destinationAlphaBlendFactor: blendState == BlendState.alphaBlend
               ? gpu.BlendFactor.oneMinusSourceAlpha
-              : gpu.BlendFactor.one,
+              : gpu.BlendFactor.zero,
         ),
       )
       ..setDepthWriteEnable(depthStencilState == DepthStencilState.depthRead)
@@ -122,7 +138,7 @@ class GraphicsDevice {
 
     _renderPass.bindVertexBuffer(
       gpu.BufferView(
-        surface.resource!,
+        surface.resource,
         offsetInBytes: 0,
         lengthInBytes: surface.verticesBytes,
       ),
@@ -131,7 +147,7 @@ class GraphicsDevice {
 
     _renderPass.bindIndexBuffer(
       gpu.BufferView(
-        surface.resource!,
+        surface.resource,
         offsetInBytes: surface.verticesBytes,
         lengthInBytes: surface.indicesBytes,
       ),
@@ -144,7 +160,9 @@ class GraphicsDevice {
 
   /// Bind a [material] and set up the buffer correctly.
   void bindMaterial(Material material) {
-    _renderPass.bindPipeline(material.resource);
+    _renderPass
+      ..bindPipeline(material.resource)
+      ..setCullMode(gpu.CullMode.values[material.cullMode.index]);
 
     material.bind(this);
     material.vertexShader.bind(this);

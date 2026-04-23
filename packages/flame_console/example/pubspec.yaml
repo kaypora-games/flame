@@ -7,16 +7,16 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  sdk: ">=3.11.0 <4.0.0"
 
 dependencies:
-  flame: ^1.34.0
-  flame_console: ^0.1.2+14
+  flame: ^1.37.0
+  flame_console: ^0.1.3
   flutter:
     sdk: flutter
 
 dev_dependencies:
-  flame_lint: ^1.4.2
+  flame_lint: ^1.4.3
   flutter_test:
     sdk: flutter
 

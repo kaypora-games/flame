@@ -6,7 +6,7 @@ import 'package:flutter_gpu/gpu.dart' as gpu;
 
 /// {@template material}
 /// Base material [Resource], it holds the shader library that should be used
-/// for the texture.
+/// for the material.
 /// {@endtemplate}
 abstract class Material extends Resource<gpu.RenderPipeline> {
   /// {@macro material}
@@ -22,8 +22,8 @@ abstract class Material extends Resource<gpu.RenderPipeline> {
   @override
   gpu.RenderPipeline createResource() {
     return gpu.gpuContext.createRenderPipeline(
-      _vertexShader.compile().resource,
-      _fragmentShader.compile().resource,
+      _vertexShader.resource,
+      _fragmentShader.resource,
     );
   }
 
@@ -40,6 +40,9 @@ abstract class Material extends Resource<gpu.RenderPipeline> {
     _fragmentShader = shader;
     recreateResource = true;
   }
+
+  /// Face culling mode for this material. Defaults to [CullMode.none].
+  CullMode cullMode = CullMode.none;
 
   void bind(GraphicsDevice device) {}
 }

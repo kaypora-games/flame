@@ -340,7 +340,7 @@ abstract class _NotifyingVector2 extends Vector2 implements NotifyingVector2 {
 /// A notifying vector that contains a required single listener
 class SingleListenerNotifyingVector2 extends _NotifyingVector2 {
 
-  VoidCallback? _listener;
+  CallbackStack? _listener;
 
   @override
   Float32List get storage => throw _error;
@@ -534,18 +534,26 @@ class SingleListenerNotifyingVector2 extends _NotifyingVector2 {
   // @override
   // Float32List get storage => super.storage.asUnmodifiableView();
 
+  // static var _callbackHellCount = 0;
+
   @override
   void addListener(VoidCallback listener) {
-    final t = _listener;
-    if (t != null) {
-      _listener = () {
-        t();
-        listener();
-        _logr.always.log(() => 'COMPOUND LISTENERS > ${caller(4)}');
-      };
-      // throw StateError('invalid call to addListener > $listener > $_listener');
-    }
-    _listener = listener;
+    (_listener ??= CallbackStack(3)).push(listener);
+    // final t = _listener ?? (_listener = CallbackStack(3));
+    // t.push(listener);
+
+    // final t = _listener;
+    //
+    // if (t != null) {
+    //   _logr.telemeter.error('callback hell detected', fatal: false);
+    //   // _listener = () {
+    //   //   t();
+    //   //   listener();
+    //   //   _logr.always.log(() => 'COMPOUND LISTENERS > ${caller(4)}');
+    //   // };
+    // }
+
+    // _listener = listener;
   }
 
   @override

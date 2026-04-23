@@ -125,6 +125,18 @@ mixin ShapeHitbox on ShapeComponent implements Hitbox<ShapeHitbox> {
       hitboxParent.size.removeListener(_parentSizeListener!);
     }
     _transformAncestors.forEach((t) => t.removeListener(_transformListener));
+
+    // End all active collisions before removing from collision detection.
+    // This ensures the parent component's activeCollisions is properly cleaned
+    // up during processLifecycleEvents(), before collisionDetection.run()
+    // processes new collisions in the same tick.
+    if (_activeCollisions != null && _activeCollisions!.isNotEmpty) {
+      for (final other in _activeCollisions!.toList()) {
+        onCollisionEnd(other);
+        other.onCollisionEnd(this);
+      }
+    }
+
     _collisionDetection?.remove(this);
     super.onRemove();
   }
@@ -177,7 +189,12 @@ mixin ShapeHitbox on ShapeComponent implements Hitbox<ShapeHitbox> {
   /// parents boundaries.
   void fillParent();
 
-  Aabb2 _recalculateAabb() {
+  /// Computes the axis-aligned bounding box for this hitbox.
+  ///
+  /// Subclasses can override this to provide a tighter AABB. The default
+  /// implementation uses the absolute scaled size and rotation.
+  @protected
+  void computeAabb(Aabb2 aabb) {
     final size = absoluteScaledSize;
     // This has double.minPositive since a point on the edge of the AABB is
     // currently counted as outside.
@@ -186,10 +203,15 @@ mixin ShapeHitbox on ShapeComponent implements Hitbox<ShapeHitbox> {
       size.y / 2 + _extentEpsilon,
     );
     _rotationMatrix.setRotationZ(absoluteAngle);
-    _validAabb = true;
-    return _aabb
+    aabb
       ..setCenterAndHalfExtents(absoluteCenter, _halfExtents)
       ..rotate(_rotationMatrix);
+  }
+
+  Aabb2 _recalculateAabb() {
+    computeAabb(_aabb);
+    _validAabb = true;
+    return _aabb;
   }
 
   //#region CollisionCallbacks methods

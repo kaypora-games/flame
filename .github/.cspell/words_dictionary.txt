@@ -8,6 +8,7 @@ hoverable
 Hoverables
 inactives
 layouting
+NTSC
 orientable
 platformer
 positionable
@@ -17,8 +18,13 @@ prerender
 prerendered
 pressable
 ptero # short for pterodactyl
+rasterizes
 refreshable
 renderable
+rerasterize
 rescan
+Roboto
 tappable
+thumbstick
+trackpad
 underutilize
