@@ -538,8 +538,9 @@ class SingleListenerNotifyingVector2 extends _NotifyingVector2 {
 
   @override
   void addListener(VoidCallback listener) {
-    final t = _listener ?? (_listener = CallbackStack(3));
-    t.push(listener);
+    (_listener ??= CallbackStack(3)).push(listener);
+    // final t = _listener ?? (_listener = CallbackStack(3));
+    // t.push(listener);
 
     // final t = _listener;
     //
