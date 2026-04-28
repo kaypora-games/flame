@@ -78,10 +78,10 @@ environment:
 dependency_overrides:
 
   plato: # swappable
-    path: ../plato/
-    # git:
-    # url: git@github.com:kaypora-games/plato.git
-    # ref: main
+    # path: ../plato/
+    git:
+    url: git@github.com:kaypora-games/plato.git
+    ref: main
 
 dev_dependencies:
   melos: ^7.4.0
