@@ -91,6 +91,7 @@ class RiveComponent
 
   RiveComponent({
     required this.artboard,
+    required this.debugName,
     this.masterScale = 1.0,
     bool antialiasing = true,
     BoxFit fit = BoxFit.contain,
@@ -105,7 +106,6 @@ class RiveComponent
     super.children,
     super.priority,
     super.key,
-    required this.debugName,
   }) : _renderer = RiveArtboardRenderer(
     antialiasing: antialiasing,
     fit: fit,
