@@ -534,26 +534,9 @@ class SingleListenerNotifyingVector2 extends _NotifyingVector2 {
   // @override
   // Float32List get storage => super.storage.asUnmodifiableView();
 
-  // static var _callbackHellCount = 0;
-
   @override
   void addListener(VoidCallback listener) {
     (_listener ??= CallbackStack(3)).push(listener);
-    // final t = _listener ?? (_listener = CallbackStack(3));
-    // t.push(listener);
-
-    // final t = _listener;
-    //
-    // if (t != null) {
-    //   _logr.telemeter.error('callback hell detected', fatal: false);
-    //   // _listener = () {
-    //   //   t();
-    //   //   listener();
-    //   //   _logr.always.log(() => 'COMPOUND LISTENERS > ${caller(4)}');
-    //   // };
-    // }
-
-    // _listener = listener;
   }
 
   @override
@@ -588,10 +571,7 @@ class ImmutableVector2 extends _NotifyingVector2 {
   factory ImmutableVector2.copy(Vector2 vector) =>
       ImmutableVector2(vector.x, vector.y);
 
-  // static var _notifyCount = 0;
-  ImmutableVector2._zero() : super.zero() {
-    // if (_notifyCount++ % 100 == 0) _logr.always.log(() => 'IMMUTABLE-VECS > $_notifyCount > ${caller(4)}');
-  }
+  ImmutableVector2._zero() : super.zero();
 
   @override
   Float32List get storage => throw _error;
