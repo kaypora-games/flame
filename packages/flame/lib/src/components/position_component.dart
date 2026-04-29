@@ -17,7 +17,7 @@ import 'package:meta/meta.dart';
 import 'package:plato/plato.dart' hide ListExtension;
 
 // ignore: unused_element
-const _logr = Logr(true, prefix: 'position_component');
+const _logr = Logr.always(prefix: 'position_component');
 
 /// A [Component] implementation that represents an object that can be
 /// freely moved around the screen, rotated, and scaled.
@@ -88,10 +88,10 @@ class PositionComponent extends Component
     super.key,
   }) : transform = Transform2D(),
        _anchor = anchor ?? Anchor.topLeft,
-       // _size = NotifyingVector2.copy(size ?? Vector2.zero())
       _size = SingleListenerNotifyingVector2(size?.x??0, size?.y??0)
   {
     decorator = Transform2DDecorator(transform);
+
     if (position != null) {
       transform.position = position;
     }
@@ -103,6 +103,8 @@ class PositionComponent extends Component
     }
     _size.addListener(_onModifiedSizeOrAnchor);
     _onModifiedSizeOrAnchor();
+
+    // _logr.log(() => 'POSITION-COMPONENT > $runtimeType >> ${super.runtimeType}');
   }
 
   final Transform2D transform;
@@ -386,9 +388,9 @@ class PositionComponent extends Component
   /// The position of the center of the component's bounding rectangle
   /// in the parent's coordinates.
   Vector2 get center => positionOfAnchor(Anchor.center);
-  set center(Vector2 point) {
-    position += point - center;
-  }
+  // set center(Vector2 point) {
+  //   position += point - center;
+  // }
 
   /// The [anchor]'s position in absolute (world) coordinates.
   Vector2 get absolutePosition => absolutePositionOfAnchor(_anchor);
@@ -587,17 +589,15 @@ $runtimeType(
 )''';
   }
 
-  double get masterScale => 1.0;
+  // @override
+  set center(Vector2 point) {
 
-  NotifyingVector2 get positionLogic => transform.position;
-  NotifyingVector2 get positionSuper => transform.position;
+    // position = positionLogic // retrieve position neutralizing master scale
+    //     + point // points
+    //     - center; // set position to new center
 
-  double get xLogic => transform.x;
-  double get yLogic => transform.y;
-
-  NotifyingVector2 get sizeLogic => _size;
-  NotifyingVector2 get sizeSuper => _size;
-
-  NotifyingVector2 get scaleLogic => transform.scale;
-  NotifyingVector2 get scaleSuper => transform.scale;
+    transform.position = transform.position // retrieve position neutralizing master scale
+        + point // points
+        - center; // set position to new center
+  }
 }
