@@ -189,6 +189,7 @@ class RiveComponent
   /// the component
   @override
   Vector2 positionOfAnchor(Anchor anchor) {
+
     if (anchor == super.anchor) {
       return actual.position;
     }
@@ -240,19 +241,20 @@ class RiveArtboardRenderer {
   void _paint(Canvas canvas, AABB bounds, Size size) {
     const position = Offset.zero;
 
-    final contentWidth = bounds[2] - bounds[0];
-    final contentHeight = bounds[3] - bounds[1];
+    final b0 = bounds[0];
+    final contentWidth = bounds[2] - b0;
+    if (contentWidth == 0) return;
 
-    if (contentWidth == 0 || contentHeight == 0) {
-      return;
-    }
+    final b1 = bounds[1];
+    final contentHeight = bounds[3] - b1;
+    if (contentHeight == 0) return;
 
     final x =
-        -1 * bounds[0] -
+        -1 * b0 -
             contentWidth / 2.0 -
             (alignment.x * contentWidth / 2.0);
     final y =
-        -1 * bounds[1] -
+        -1 * b1 -
             contentHeight / 2.0 -
             (alignment.y * contentHeight / 2.0);
 
@@ -264,50 +266,56 @@ class RiveArtboardRenderer {
       canvas.clipRect(position & size);
     }
 
+    final w = size.width;
+    final h = size.height;
+
     switch (fit) {
       case BoxFit.fill:
-        scaleX = size.width / contentWidth;
-        scaleY = size.height / contentHeight;
+        scaleX = w / contentWidth;
+        scaleY = h / contentHeight;
       case BoxFit.contain:
         final minScale = min(
-          size.width / contentWidth,
-          size.height / contentHeight,
+          w / contentWidth,
+          h / contentHeight,
         );
         scaleX = scaleY = minScale;
       case BoxFit.cover:
         final maxScale = max(
-          size.width / contentWidth,
-          size.height / contentHeight,
+          w / contentWidth,
+          h / contentHeight,
         );
         scaleX = scaleY = maxScale;
       case BoxFit.fitHeight:
-        final minScale = size.height / contentHeight;
+        final minScale = h / contentHeight;
         scaleX = scaleY = minScale;
       case BoxFit.fitWidth:
-        final minScale = size.width / contentWidth;
+        final minScale = w / contentWidth;
         scaleX = scaleY = minScale;
       case BoxFit.none:
         scaleX = scaleY = 1.0;
       case BoxFit.scaleDown:
         final minScale = min(
-          size.width / contentWidth,
-          size.height / contentHeight,
+          w / contentWidth,
+          h / contentHeight,
         );
         scaleX = scaleY = minScale < 1.0 ? minScale : 1.0;
     }
 
-    Mat2D.setIdentity(_transform);
-    _transform[4] = size.width / 2.0 + (alignment.x * size.width / 2.0);
-    _transform[5] = size.height / 2.0 + (alignment.y * size.height / 2.0);
-    Mat2D.scale(_transform, _transform, Vec2D.fromValues(scaleX, scaleY));
-    Mat2D.setIdentity(_center);
+    Mat2D.setIdentity4(_transform);
+    _transform[4] = w / 2.0 + (alignment.x * w / 2.0);
+    _transform[5] = h / 2.0 + (alignment.y * h / 2.0);
+
+    Mat2D.scaleValues(_transform, _transform, scaleX, scaleY);
+
+    Mat2D.setIdentity4(_center);
     _center[4] = x;
     _center[5] = y;
-    Mat2D.multiply(_transform, _transform, _center);
+
+    Mat2D.multiplyVoid(_transform, _transform, _center);
 
     canvas.translate(
-      size.width / 2.0 + (alignment.x * size.width / 2.0),
-      size.height / 2.0 + (alignment.y * size.height / 2.0),
+      w / 2.0 + (alignment.x * w / 2.0),
+      h / 2.0 + (alignment.y * h / 2.0),
     );
 
     canvas.scale(scaleX, scaleY);
@@ -333,8 +341,8 @@ Future<Artboard> loadArtboard(
   } else {
     final artboard = loaded.artboardByName(artboardName)?.instance();
     assert(
-    artboard != null,
-    'No artboard with the specified name exists in the RiveFile',
+      artboard != null,
+      'No artboard with the specified name exists in the RiveFile',
     );
     return artboard!;
   }

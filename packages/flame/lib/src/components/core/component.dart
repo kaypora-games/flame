@@ -428,8 +428,15 @@ class Component {
   @internal
   static Game? staticGameInstance;
 
+  FlameGame? _game;
+
   /// Fetches the nearest [FlameGame] ancestor to the component.
   FlameGame? findGame() {
+
+    if (_game != null) {
+      return _game;
+    }
+
     assert(
       staticGameInstance is FlameGame || staticGameInstance == null,
       'A component needs to have a FlameGame as the root.',
@@ -437,17 +444,23 @@ class Component {
     final gameInstance = staticGameInstance is FlameGame
         ? staticGameInstance! as FlameGame
         : null;
-    return gameInstance ??
+    return _game = gameInstance ??
         ((this is FlameGame) ? (this as FlameGame) : _parent?.findGame());
   }
 
+  FlameGame? _rootGame;
+
   /// Fetches the root [FlameGame] ancestor to the component.
   FlameGame? findRootGame() {
+    if (_rootGame != null) {
+      return _rootGame;
+    }
+
     var game = findGame();
     while (game?.parent != null) {
       game = game!.parent!.findGame();
     }
-    return game;
+    return _rootGame = game;
   }
 
   /// Whether the children list contains the given component.
