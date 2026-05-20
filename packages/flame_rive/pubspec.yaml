@@ -22,7 +22,9 @@ dependencies:
   flutter:
     sdk: flutter
   plato:
-  rive: ^0.13.20 # legacy rive, upstream/master has updated to rive renderer
+  rive: # ^0.13.20 # legacy rive, upstream/master has updated to rive renderer > this is provided in the dependency_overrides section of root pubspec.yaml
+  rive_common:
+  stokanal:
 
 dev_dependencies:
   dartdoc: ^9.0.0
