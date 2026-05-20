@@ -77,11 +77,25 @@ environment:
 
 dependency_overrides:
 
-  plato: # swappable
-    # path: ../plato/
+  plato:
     git:
-    url: git@github.com:kaypora-games/plato.git
-    ref: main
+      url: git@github.com:kaypora-games/plato.git
+      ref: main
+
+  stokanal:
+    git:
+      url: git@github.com:kaypora-games/stokanal-flutter.git
+      ref: master
+
+  rive:
+    git:
+      url: git@github.com:kaypora-games/rive-flutter.git
+      ref: master
+
+  rive_common:
+    git:
+      url: git@github.com:kaypora-games/rive-common.git
+      ref: main
 
 dev_dependencies:
   melos: ^7.4.0
