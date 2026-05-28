@@ -21,7 +21,8 @@ dependencies:
     sdk: flutter
 
  collection: ^1.19.1
- flame: ^1.37.0
+ flame:
+   path: ../flame
  
  plato:
    git:
