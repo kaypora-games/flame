@@ -17,32 +17,35 @@ environment:
   flutter: ">=3.41.0"
 
 dependencies:
- flutter:
+  flutter:
     sdk: flutter
 
- collection: ^1.19.1
- flame:
-   path: ../flame
- 
- plato:
-   git:
-     url: git@github.com:kaypora-games/plato.git
-     ref: main
+  collection: ^1.19.1
+  flame:
+    git:
+      url: git@github.com:kaypora-games/flame.git
+      ref: main
+      path: packages/flame
 
- stokanal:
-   git:
-     url: git@github.com:kaypora-games/stokanal-flutter.git
-     ref: master
+  plato:
+    git:
+      url: git@github.com:kaypora-games/plato.git
+      ref: main
 
- rive:
-   git:
-     url: git@github.com:kaypora-games/rive-flutter.git
-     ref: master
+  stokanal:
+    git:
+      url: git@github.com:kaypora-games/stokanal-flutter.git
+      ref: master
 
- rive_common:
-   git:
-     url: git@github.com:kaypora-games/rive-common.git
-     ref: main
+  rive:
+    git:
+      url: git@github.com:kaypora-games/rive-flutter.git
+      ref: master
+
+  rive_common:
+    git:
+      url: git@github.com:kaypora-games/rive-common.git
+      ref: main
 
 dev_dependencies:
   dartdoc: ^9.0.0
