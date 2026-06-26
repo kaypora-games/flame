@@ -212,7 +212,7 @@ extension Vector2Extension on Vector2 {
     final precision = pow(10, maxPrecision);
     final truncatedX = (x * precision).truncate() / precision;
     final truncatedY = (y * precision).truncate() / precision;
-    return '($truncatedX, $truncatedY)';
+    return '($truncatedX,$truncatedY)';
   }
 
   /// Create a Vector2 with ints as input
