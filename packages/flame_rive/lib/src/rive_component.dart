@@ -16,6 +16,14 @@ final class LogicGate {
   final LogicPositionComponent _component;
   LogicGate._(this._component);
 
+  @override
+  String toString() => printr(
+    'position=', position,
+    'scale=', scale,
+    'size=', size,
+    'scale=', _defaultScale,
+  );
+
   ActualGate get _actual => _component.actual;
   bool get _defaultScale => _component.defaultScale;
   double get _masterScale => _component.masterScale;
@@ -50,6 +58,13 @@ final class ActualGate {
   double get x => _component.transform.x;
   double get y => _component.transform.y;
   NotifyingVector2 get size => _component._sizeSuper;
+
+  @override
+  String toString() => printr(
+    'position=', position,
+    'scale=', scale,
+    'size=', size,
+  );
 }
 
 /// A position component that introduces logic coordinates and a master scale
@@ -107,6 +122,30 @@ abstract class LogicPositionComponent
       super.size = defaultScale ? size :size * masterScale;
 
   NotifyingVector2 get _sizeSuper => super.size;
+
+  /// Dump this component properties
+  String dump() => printr(
+    parent == null ? 'orphan' : null,
+    isRemoving ? 'removing' : null,
+    isRemoved ? 'removed' : null,
+    !isLoaded ? 'not-loaded' : null,
+    isLoading ? 'loading' : null,
+    isRemoving ? 'removing' : null,
+    !isMounted ? 'not-mounted' : null,
+    'priority=$priority',
+    children.isNotEmpty ? 'children=${children.length}' : null,
+    'x=$x',
+    'y=$y',
+    'position=$position',
+    'anchor=$anchor',
+    'size=$size',
+    'width=$width',
+    'height=$height',
+    'actual=$actual',
+    'logic=$logic',
+    'scale=$scale',
+    'scaledSize=$scaledSize',
+  );
 
   // Uncomment me to make sure no app logic is accessing any of the methods below
   // These methods must be invoked via .actual or .logic properties
