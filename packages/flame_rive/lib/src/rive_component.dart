@@ -95,7 +95,12 @@ abstract class LogicPositionComponent
     logic = LogicGate._(this);
   }
 
+  /// Gate to actual coordinates
+  /// This will return coordinates dependent on the master scale
   late final ActualGate actual;
+
+  /// Gate to logic coordinates
+  /// This will return coordinates independent on the master scale
   late final LogicGate logic;
 
   @override
@@ -147,41 +152,42 @@ abstract class LogicPositionComponent
     'scaledSize=$scaledSize',
   );
 
+  int _callerChecks = 0;
+
   // Uncomment me to make sure no app logic is accessing any of the methods below
   // These methods must be invoked via .actual or .logic properties
-  // void _checkCaller() {
-  //   final c = caller(1);
-  //   if (c.contains('bfut') || c.contains('plato') || c.contains('stokanal')) {
-  //     if (Randoms().hit(0.1)) {
-  //       _logr.dump(maxFrames: 10, () => 'review call');
-  //     }
-  //   }
-  // }
-  // @override
-  // NotifyingVector2 get position {
-  //   _checkCaller();
-  //   return super.position;
-  // }
-  // @override
-  // NotifyingVector2 get scale {
-  //   _checkCaller();
-  //   return super.scale;
-  // }
-  // @override
-  // double get x {
-  //   _checkCaller();
-  //   return super.x;
-  // }
-  // @override
-  // double get y {
-  //   _checkCaller();
-  //   return super.y;
-  // }
-  // @override
-  // NotifyingVector2 get size {
-  //   _checkCaller();
-  //   return super.size;
-  // }
+  void _checkCaller() {
+    _callerChecks++;
+    final c = caller(2, false);
+    if (c.contains('bfut') || c.contains('plato') || c.contains('stokanal')) {
+      _logr.warn(() => 'review call > $c');
+    }
+  }
+  @override
+  NotifyingVector2 get position {
+    if (kDebugMode && _callerChecks < 100) _checkCaller();
+    return super.position;
+  }
+  @override
+  NotifyingVector2 get scale {
+    if (kDebugMode && _callerChecks < 100) _checkCaller();
+    return super.scale;
+  }
+  @override
+  double get x {
+    if (kDebugMode && _callerChecks < 100) _checkCaller();
+    return super.x;
+  }
+  @override
+  double get y {
+    if (kDebugMode && _callerChecks < 100) _checkCaller();
+    return super.y;
+  }
+  @override
+  NotifyingVector2 get size {
+    if (kDebugMode && _callerChecks < 100) _checkCaller();
+    return super.size;
+  }
 }
 
 class RiveComponent
