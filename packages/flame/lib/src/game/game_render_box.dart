@@ -131,7 +131,9 @@ class GameRenderBox extends RenderBox with WidgetsBindingObserver {
       return;
     }
     game.update(dt);
-    markNeedsPaint();
+    if (game.needsPaint) {
+      markNeedsPaint();
+    }
   }
 
   @override

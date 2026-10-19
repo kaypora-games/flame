@@ -12,7 +12,10 @@ dependencies:
   flame_rive: ^1.11.1
   flutter:
     sdk: flutter
-  rive: ^0.13.20 # legacy rive, upstream/master has updated to rive renderer
+  rive:
+    git:
+      url: git@github.com:kaypora-games/rive-flutter.git
+      ref: master
 
 dev_dependencies:
   flame_lint: ^1.4.3

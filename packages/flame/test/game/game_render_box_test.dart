@@ -9,6 +9,35 @@ class _MockFlameGame extends Mock implements FlameGame {}
 
 class _MockBuildContext extends Mock implements BuildContext {}
 
+/// A game that can decide whether it wants to be repainted after an update.
+class _ThrottledGame extends FlameGame {
+  bool paintAfterUpdate = true;
+  int updates = 0;
+
+  @override
+  bool get needsPaint => paintAfterUpdate;
+
+  @override
+  void update(double dt) {
+    updates++;
+    super.update(dt);
+  }
+}
+
+/// Counts how many times the render box asked Flutter to repaint it.
+class _CountingGameRenderBox extends GameRenderBox {
+  _CountingGameRenderBox(super.game, super.buildContext)
+    : super(isRepaintBoundary: false);
+
+  int paintRequests = 0;
+
+  @override
+  void markNeedsPaint() {
+    paintRequests++;
+    super.markNeedsPaint();
+  }
+}
+
 final _nodesNeedingCompositingBitsUpdate = <RenderObject>[];
 
 void main() {
@@ -67,6 +96,42 @@ void main() {
       renderBox.isRepaintBoundary = true;
 
       expect(renderBox.isRepaintBoundary, true);
+    });
+
+    test('gameLoopCallback repaints on every tick by default', () {
+      final game = FlameGame()..pauseEngine();
+      final BuildContext context = _MockBuildContext();
+      final renderBox = _CountingGameRenderBox(game, context);
+      renderBox.attach(PipelineOwner());
+
+      renderBox.gameLoopCallback(0.016);
+      renderBox.gameLoopCallback(0.016);
+
+      expect(renderBox.paintRequests, 2);
+      renderBox.detach();
+    });
+
+    test('gameLoopCallback skips markNeedsPaint when the game does not need '
+        'to be painted', () {
+      final game = _ThrottledGame()..pauseEngine();
+      final BuildContext context = _MockBuildContext();
+      final renderBox = _CountingGameRenderBox(game, context);
+      renderBox.attach(PipelineOwner());
+
+      game.paintAfterUpdate = false;
+      renderBox.gameLoopCallback(0.016);
+      renderBox.gameLoopCallback(0.016);
+
+      // The game is still updated on every tick, it is only not repainted.
+      expect(game.updates, 2);
+      expect(renderBox.paintRequests, 0);
+
+      game.paintAfterUpdate = true;
+      renderBox.gameLoopCallback(0.016);
+
+      expect(game.updates, 3);
+      expect(renderBox.paintRequests, 1);
+      renderBox.detach();
     });
   });
 }
