@@ -65,6 +65,22 @@ abstract mixin class Game {
   /// This should render the game.
   void render(Canvas canvas);
 
+  /// Whether the game needs to be repainted after the last call to [update].
+  ///
+  /// [GameRenderBox] reads this once per game-loop tick, right after [update]
+  /// returns, to decide whether to call `markNeedsPaint()`. The default
+  /// implementation always returns `true`, which keeps the standard behavior
+  /// of repainting the game on every tick.
+  ///
+  /// Games that throttle their own updates (i.e. skip the actual update work
+  /// on some ticks) can override this to return `false` on the ticks in which
+  /// nothing changed. This avoids traversing the whole component tree in
+  /// [render] and re-rasterizing the game layer for frames that would be
+  /// identical to the previous one.
+  ///
+  /// Returning `false` never cancels a repaint that is already pending.
+  bool get needsPaint => true;
+
   /// Just a reference back to the render box that is kept up to date by the
   /// engine.
   GameRenderBox get renderBox => _gameRenderBox!;
