@@ -84,11 +84,11 @@ class CircleComponent extends ShapeComponent {
     }
   }
 
-  @override
-  void renderDebugMode(Canvas canvas) {
-    super.renderDebugMode(canvas);
-    canvas.drawCircle(_centerOffset, radius, debugPaint);
-  }
+  // @override
+  // void renderDebugMode(Canvas canvas) {
+  //   super.renderDebugMode(canvas);
+  //   canvas.drawCircle(_centerOffset, radius, debugPaint);
+  // }
 
   /// Checks whether the represented circle contains the [point].
   @override

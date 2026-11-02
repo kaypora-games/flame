@@ -190,11 +190,11 @@ class PolygonComponent extends ShapeComponent {
     }
   }
 
-  @override
-  void renderDebugMode(Canvas canvas) {
-    super.renderDebugMode(canvas);
-    canvas.drawPath(_path, debugPaint);
-  }
+  // @override
+  // void renderDebugMode(Canvas canvas) {
+  //   super.renderDebugMode(canvas);
+  //   canvas.drawPath(_path, debugPaint);
+  // }
 
   bool _containsPoint(Vector2 point, List<Vector2> vertices) {
     // If the size is 0 then it can't contain any points
