@@ -497,37 +497,37 @@ class PositionComponent extends Component
     transform.offset = Vector2(-_anchor.x * _size.x, -_anchor.y * _size.y);
   }
 
-  @override
-  void renderDebugMode(Canvas canvas) {
-    final zoom = CameraComponent.currentCamera?.viewfinder.zoom ?? 1.0;
-    super.renderDebugMode(canvas);
-    final precision = debugCoordinatesPrecision;
-    canvas.drawRect(size.toRect(), debugPaint);
-    // draw small cross at the anchor point
-    final p0 = -transform.offset;
-    canvas.drawLine(Offset(p0.x, p0.y - 2), Offset(p0.x, p0.y + 2), debugPaint);
-    canvas.drawLine(Offset(p0.x - 2, p0.y), Offset(p0.x + 2, p0.y), debugPaint);
-    if (precision != null) {
-      // print coordinates at the top-left corner
-      final p1 = absolutePositionOfAnchor(Anchor.topLeft);
-      final x1str = p1.x.toStringAsFixed(precision);
-      final y1str = p1.y.toStringAsFixed(precision);
-      debugTextPaint.render(
-        canvas,
-        'x:$x1str y:$y1str',
-        Vector2(-10 * (precision + 3) / zoom, -15 / zoom),
-      );
-      // print coordinates at the bottom-right corner
-      final p2 = absolutePositionOfAnchor(Anchor.bottomRight);
-      final x2str = p2.x.toStringAsFixed(precision);
-      final y2str = p2.y.toStringAsFixed(precision);
-      debugTextPaint.render(
-        canvas,
-        'x:$x2str y:$y2str',
-        Vector2(size.x - 10 * (precision + 3) / zoom, size.y),
-      );
-    }
-  }
+  // @override
+  // void renderDebugMode(Canvas canvas) {
+  //   final zoom = CameraComponent.currentCamera?.viewfinder.zoom ?? 1.0;
+  //   super.renderDebugMode(canvas);
+  //   final precision = debugCoordinatesPrecision;
+  //   canvas.drawRect(size.toRect(), debugPaint);
+  //   // draw small cross at the anchor point
+  //   final p0 = -transform.offset;
+  //   canvas.drawLine(Offset(p0.x, p0.y - 2), Offset(p0.x, p0.y + 2), debugPaint);
+  //   canvas.drawLine(Offset(p0.x - 2, p0.y), Offset(p0.x + 2, p0.y), debugPaint);
+  //   if (precision != null) {
+  //     // print coordinates at the top-left corner
+  //     final p1 = absolutePositionOfAnchor(Anchor.topLeft);
+  //     final x1str = p1.x.toStringAsFixed(precision);
+  //     final y1str = p1.y.toStringAsFixed(precision);
+  //     debugTextPaint.render(
+  //       canvas,
+  //       'x:$x1str y:$y1str',
+  //       Vector2(-10 * (precision + 3) / zoom, -15 / zoom),
+  //     );
+  //     // print coordinates at the bottom-right corner
+  //     final p2 = absolutePositionOfAnchor(Anchor.bottomRight);
+  //     final x2str = p2.x.toStringAsFixed(precision);
+  //     final y2str = p2.y.toStringAsFixed(precision);
+  //     debugTextPaint.render(
+  //       canvas,
+  //       'x:$x2str y:$y2str',
+  //       Vector2(size.x - 10 * (precision + 3) / zoom, size.y),
+  //     );
+  //   }
+  // }
 
   @override
   void renderTree(Canvas canvas) {

@@ -53,7 +53,7 @@ void main() {
           world: world,
           viewport: CircularViewport(20)
             ..position = Vector2(5, 5)
-            ..debugMode = true,
+            // ..debugMode = true,
         );
         game.addAll([world, camera]);
       },
@@ -69,7 +69,7 @@ void main() {
         final world = _MyWorld();
         final camera = CameraComponent(
           world: world,
-          viewport: CircularViewport.ellipse(5, 10)..debugMode = true,
+          viewport: CircularViewport.ellipse(5, 10),//..debugMode = true,
         );
         game.addAll([world, camera]);
         await game.ready();
@@ -105,7 +105,7 @@ void main() {
         final camera = CameraComponent(
           world: world,
           viewport: CircularViewport(20)..position = Vector2(5, 5),
-          viewfinder: Viewfinder()..debugMode = true,
+          viewfinder: Viewfinder(),//..debugMode = true,
         );
         game.addAll([world, camera]);
       },

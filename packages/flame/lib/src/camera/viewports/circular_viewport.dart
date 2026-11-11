@@ -39,8 +39,8 @@ class CircularViewport extends Viewport {
     _clipPath = Path()..addOval(Rect.fromLTRB(0, 0, size.x, size.y));
   }
 
-  @override
-  void renderDebugMode(Canvas canvas) {
-    canvas.drawPath(_clipPath, debugPaint);
-  }
+  // @override
+  // void renderDebugMode(Canvas canvas) {
+  //   canvas.drawPath(_clipPath, debugPaint);
+  // }
 }

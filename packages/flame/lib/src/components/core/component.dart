@@ -12,6 +12,9 @@ import 'package:flutter/painting.dart';
 import 'package:meta/meta.dart';
 import 'package:ordered_set/ordered_set.dart';
 import 'package:ordered_set/read_only_ordered_set.dart';
+import 'package:plato/plato.dart';
+
+const _logr = Logr.always(prefix: 'component');
 
 /// [Component]s are the basic building blocks for a [FlameGame].
 ///
@@ -615,6 +618,8 @@ class Component {
     }
   }
 
+  var _neverLoggedRenderProblem = true;
+
   /// Called once after all children have been rendered in [renderTree].
   ///
   /// Override to flush any state accumulated across [renderChild] calls
@@ -628,7 +633,16 @@ class Component {
       _renderContexts.add(context);
     }
 
-    render(canvas);
+    try {
+      render(canvas);
+    } catch (e) {
+      if (_neverLoggedRenderProblem) {
+        _neverLoggedRenderProblem = false;
+        _logr.telemeter.log(() => 'Component.render problem > $runtimeType $e');
+      }
+      rethrow;
+    }
+
     final children = _children;
     if (children != null) {
       for (final child in children) {
@@ -638,9 +652,9 @@ class Component {
     }
 
     // Any debug rendering should be rendered on top of everything
-    if (debugMode) {
-      renderDebugMode(canvas);
-    }
+    // if (debugMode) {
+    //   renderDebugMode(canvas);
+    // }
 
     if (context != null) {
       _renderContexts.removeLast();
@@ -1057,7 +1071,7 @@ class Component {
       _setRemovedBit();
       return;
     }
-    debugMode |= _parent!.debugMode;
+    // debugMode |= _parent!.debugMode;
     onMount();
     _setMountedBit();
     _mountCompleter?.complete();
@@ -1189,12 +1203,12 @@ class Component {
   /// You can use this value to enable debug behaviors for your game and many
   /// components will
   /// show extra information on the screen when debug mode is activated.
-  bool debugMode = false;
+  // bool debugMode = false;
 
   /// How many decimal digits to print when displaying coordinates in the
   /// debug mode. Setting this to null will suppress all coordinates from
   /// the output.
-  int? debugCoordinatesPrecision = 0;
+  // int? debugCoordinatesPrecision = 0;
 
   /// A key that can be used to identify this component in the tree.
   ///
@@ -1202,49 +1216,49 @@ class Component {
   final ComponentKey? key;
 
   /// The color that the debug output should be rendered with.
-  Color debugColor = const Color(0xFFFF00FF);
+  // Color debugColor = const Color(0xFFFF00FF);
 
-  final ValueCache<Paint> _debugPaintCache = ValueCache<Paint>();
-  final ValueCache<TextPaint> _debugTextPaintCache = ValueCache<TextPaint>();
+  // final ValueCache<Paint> _debugPaintCache = ValueCache<Paint>();
+  // final ValueCache<TextPaint> _debugTextPaintCache = ValueCache<TextPaint>();
 
   /// The [debugColor] represented as a [Paint] object.
-  Paint get debugPaint {
-    if (!_debugPaintCache.isCacheValid([debugColor])) {
-      final paint = Paint()
-        ..color = debugColor
-        ..strokeWidth =
-            0 // hairline-width
-        ..style = PaintingStyle.stroke;
-      _debugPaintCache.updateCache(paint, [debugColor]);
-    }
-    return _debugPaintCache.value!;
-  }
+  // Paint get debugPaint {
+  //   if (!_debugPaintCache.isCacheValid([debugColor])) {
+  //     final paint = Paint()
+  //       ..color = debugColor
+  //       ..strokeWidth =
+  //           0 // hairline-width
+  //       ..style = PaintingStyle.stroke;
+  //     _debugPaintCache.updateCache(paint, [debugColor]);
+  //   }
+  //   return _debugPaintCache.value!;
+  // }
 
   /// Returns a [TextPaint] object with the [debugColor] set as color for the
   /// text.
-  TextPaint get debugTextPaint {
-    final viewfinder = CameraComponent.currentCamera?.viewfinder;
-    final viewport = CameraComponent.currentCamera?.viewport;
-    final zoom = viewfinder?.zoom ?? 1.0;
+  // TextPaint get debugTextPaint {
+  //   final viewfinder = CameraComponent.currentCamera?.viewfinder;
+  //   final viewport = CameraComponent.currentCamera?.viewport;
+  //   final zoom = viewfinder?.zoom ?? 1.0;
+  //
+  //   final viewportScale = math.max(
+  //     viewport?.transform.scale.x ?? 1,
+  //     viewport?.transform.scale.y ?? 1,
+  //   );
+  //
+  //   if (!_debugTextPaintCache.isCacheValid([debugColor])) {
+  //     final textPaint = TextPaint(
+  //       style: TextStyle(
+  //         color: debugColor,
+  //         fontSize: 12 / zoom / viewportScale,
+  //       ),
+  //     );
+  //     _debugTextPaintCache.updateCache(textPaint, [debugColor]);
+  //   }
+  //   return _debugTextPaintCache.value!;
+  // }
 
-    final viewportScale = math.max(
-      viewport?.transform.scale.x ?? 1,
-      viewport?.transform.scale.y ?? 1,
-    );
-
-    if (!_debugTextPaintCache.isCacheValid([debugColor])) {
-      final textPaint = TextPaint(
-        style: TextStyle(
-          color: debugColor,
-          fontSize: 12 / zoom / viewportScale,
-        ),
-      );
-      _debugTextPaintCache.updateCache(textPaint, [debugColor]);
-    }
-    return _debugTextPaintCache.value!;
-  }
-
-  void renderDebugMode(Canvas canvas) {}
+  // void renderDebugMode(Canvas canvas) {}
 
   //#endregion
 }

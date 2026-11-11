@@ -72,14 +72,14 @@ mixin HasAutoBatchedChildren on Component {
     final batchInfo = _tryGetBatchInfo(child);
     if (batchInfo != null) {
       _accumulateChild(child as PositionComponent, batchInfo);
-      if (child.debugMode) {
-        for (final hitbox in child.children.whereType<ShapeHitbox>()) {
-          canvas.save();
-          canvas.transform2D(child.transform);
-          hitbox.renderDebugMode(canvas);
-          canvas.restore();
-        }
-      }
+      // if (child.debugMode) {
+      //   for (final hitbox in child.children.whereType<ShapeHitbox>()) {
+      //     canvas.save();
+      //     canvas.transform2D(child.transform);
+      //     hitbox.renderDebugMode(canvas);
+      //     canvas.restore();
+      //   }
+      // }
     } else {
       // Non-eligible child: flush any pending batch first so that the child
       // renders after already-accumulated sprites (same priority group).
