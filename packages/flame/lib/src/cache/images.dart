@@ -21,13 +21,17 @@ class Images {
   int get length => _assets.values.map((a) => a.length).sum;
 
   @override
-  String toString() => Printr.print(this,
+  String toString() => printr(
     'items=${_assets.length}',
-    _assets.values.map((a) => a.name).join(', '),
     'length=$length',
+    '\n',
+    _assets.keys.join('\n'),
   );
 
   final _assets = LruCache<String, _ImageAsset>();
+
+  String? findName(Image image) =>
+      _assets.values.firstWhereOrNull((a) => a.image == image)?.name;
 
   bool get isNotEmpty => _assets.isNotEmpty;
 
@@ -97,6 +101,10 @@ class Images {
     removedAsset?.dispose();
   }
 
+  /// Remove without disposing the image
+  void remove(String name) =>
+      _assets.remove(name);
+
   /// Removes all cached images.
   ///
   /// This calls [Image.dispose] for all images in the cache, so make sure that
@@ -146,34 +154,16 @@ class Images {
   /// Loads all images from the specified (or default) [prefix] into the cache.
   Future<List<Image>> loadAllImages() {
     throw StateError('do not call loadAllImages()');
-    // return loadAllFromPattern(
-    //   RegExp(
-    //     r'\.(png|jpg|jpeg|svg|gif|webp|bmp|wbmp)$',
-    //     caseSensitive: false,
-    //   ),
-    // );
   }
 
   /// Loads all images in the [prefix]ed path that are matching the specified
   /// pattern.
   Future<List<Image>> loadAllFromPattern(Pattern pattern) async {
     throw StateError('do not call loadAllFromPattern()');
-    // final manifest = await AssetManifest.loadFromAssetBundle(bundle);
-    // final imagePaths = manifest
-    //     .listAssets()
-    //     .where((path) {
-    //       return path.startsWith(_prefix) &&
-    //           path.toLowerCase().contains(pattern);
-    //     })
-    //     .map((path) => path.replaceFirst(_prefix, ''));
-    // return loadAll(imagePaths.toList());
   }
 
   /// Whether the cache contains the specified [key] or not.
   bool containsKey(String key) => _assets.containsKey(key);
-
-  // /// Returns the list of keys in the cache.
-  // Iterable<String> get keys => _assets.keys;
 
   String? removeEldest() =>
       _assets.removeEldest()?.key;
@@ -204,16 +194,7 @@ class Images {
   Future<Image> _fetchToMemory(String name, {String? package}) async {
     final prefix = package == null ? _prefix : 'packages/$package/$_prefix';
     final bytes = await Plato().provider.assetLoader.loadBytes('$prefix$name');
-    // final watch = Stopwatch()..start();
-    // final data = await bundle.load('$_prefix$name');
-    // _logr.log(() => '_fetchToMemory LOAD > $name > ${watch.elapsedMilliseconds}');
-    // watch.reset();
-    // final bytes = Uint8List.view(data.buffer);
-    // _logr.log(() => '_fetchToMemory BYTES > $name > ${watch.elapsedMilliseconds}');
     _logr.log(() => '_fetchToMemory > $name ${bytes.length}');
-    // if (name.contains('stadium')) {
-    //   debugPrintStack(maxFrames: 20);
-    // }
     return decodeImageFromList(bytes);
   }
 }
